@@ -5,6 +5,15 @@ spring:
         server-addr: 127.0.0.1:8848
     gateway:
       routes:
+        # 会员服务网关
+        - id: member_router
+          uri: lb://gulimall-member
+          predicates:
+            - Path=/api/member/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+          #  http://localhost:88/api/member/** --> http:localhost:8000/member/**
+
         # 第三方服务网关
         - id: third-party_router
           uri: lb://gulimall-third-party

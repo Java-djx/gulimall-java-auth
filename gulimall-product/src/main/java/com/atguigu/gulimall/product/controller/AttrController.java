@@ -30,6 +30,8 @@ public class AttrController {
     @Autowired
     private AttrService attrService;
 
+
+
     //product/attr/base/list/{catelogId} 获取分类规格参数
     ///product/attr/sale/list/{catelogId} 获取分类销售属性
         @GetMapping("/{attrType}/list/{catelogId}")

@@ -34,6 +34,7 @@ public class MemberController {
     private CouponFeignService couponFeignService;
 
 
+
     /**
      * 测试openfeign 是否调用成功
      *
