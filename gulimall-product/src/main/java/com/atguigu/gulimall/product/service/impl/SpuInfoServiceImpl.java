@@ -8,11 +8,13 @@ import com.atguigu.gulimall.product.feign.CouponFeignService;
 import com.atguigu.gulimall.product.service.*;
 import com.atguigu.gulimall.product.vo.*;
 import com.sun.org.apache.bcel.internal.generic.NEW;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -69,6 +71,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     /**
      * 保存 SPU基本消息 SPU图片 SPU详情
+     * TODO 等待分布式事务解决问题
      *
      * @param vo
      */
@@ -107,19 +110,17 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 }).collect(Collectors.toList());
         //插入数据
         attrValueService.saveBatchProductAttr(valueEntityList);
-
         //保存spu的积分消息 gulimall_sms-》sms_spu_bounds
         Bounds bounds = vo.getBounds();
         //构造远程传输对象TO
         SpuBoundTo spuBoundTo = new SpuBoundTo();
-        BeanUtils.copyProperties(bounds,spuBoundTo);
+        BeanUtils.copyProperties(bounds, spuBoundTo);
         spuBoundTo.setSpuId(spuInfoEntity.getId());
         //保存spu的积分消息  调用优惠券微服务
         R r = couponFeignService.saveSpuBounds(spuBoundTo);
         if (r.getCode() != 0) {
             log.error("远程服务调用spu积分消息失败");
         }
-
 
         //5. 保存当前SPU对应的sku消息
         //5.1)sku的基本消息    pms_sku_info
@@ -129,15 +130,15 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 /**
                  * 收集图片消息
                  */
-                String defaultImg="";
+                String defaultImg = "";
                 for (Images image : item.getImages()) {
-                    if (image.getDefaultImg()==1){
-                        defaultImg=image.getImgUrl();
+                    if (image.getDefaultImg() == 1) {
+                        defaultImg = image.getImgUrl();
                     }
                 }
                 //收集消息
                 SkuInfoEntity skuInfoEntity = new SkuInfoEntity();
-                BeanUtils.copyProperties(item,skuInfoEntity);
+                BeanUtils.copyProperties(item, skuInfoEntity);
                 skuInfoEntity.setBrandId(spuInfoEntity.getBrandId());
                 skuInfoEntity.setCatalogId(spuInfoEntity.getCatalogId());
                 skuInfoEntity.setSaleCount(0L);
@@ -152,8 +153,12 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                     skuImagesEntity.setImgUrl(img.getImgUrl());
                     skuImagesEntity.setDefaultImg(img.getDefaultImg());
                     return skuImagesEntity;
+                }).filter(entitys -> {
+                    //返回true就是需要的属性
+                    return !StringUtils.isBlank((entitys.getImgUrl()));
                 }).collect(Collectors.toList());
                 //5.2)sku的图片消息    pms_sku_images
+                //TODO 没有图片路径不保存
                 skuImagesService.saveBatch(imagesEntities);
                 //5.3)sku的销售属性消息 pms_sku_sale_attr_value
                 List<Attr> attr = item.getAttr();
@@ -172,17 +177,17 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 // ->sms_sku_full_reduction 满减
                 // ->sms_member_price 会员打折
                 SkuReductionTo skuReductionTo = new SkuReductionTo();
-                BeanUtils.copyProperties(item,skuReductionTo);
+                BeanUtils.copyProperties(item, skuReductionTo);
                 skuReductionTo.setSkuId(skuId);
-                R r1 = couponFeignService.saveInfo(skuReductionTo);
-                if (r1.getCode() != 0) {
-                    log.error("远程服务调用spu优惠失败");
+                if (skuReductionTo.getFullCount() > 0 || skuReductionTo.getFullPrice().compareTo(new BigDecimal("0")) == 1) {
+                    R r1 = couponFeignService.saveInfo(skuReductionTo);
+                    if (r1.getCode() != 0) {
+                        log.error("远程服务调用spu优惠失败");
+                    }
                 }
 
             });
         }
-
-
 
 
     }
