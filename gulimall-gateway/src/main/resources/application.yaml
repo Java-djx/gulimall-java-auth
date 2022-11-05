@@ -1,0 +1,42 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    gateway:
+      routes:
+        # 第三方服务网关
+        - id: third-party_router
+          uri: lb://gulimall-third-party
+          predicates:
+            - Path=/api/thirdparty/**
+          filters:
+            - RewritePath=/api/thirdparty/(?<segment>.*),/$\{segment}
+          #  http:localhost:88/api/thirdparty --> http:localhost:30000/gulimall-third-party/**
+
+        # 商品网关
+        - id: product_router
+          uri: lb://gulimall-product
+          predicates:
+            - Path=/api/product/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+          #  http:localhost:88/api/product --> http:localhost:10000/gulimall-product/**
+
+        #后台网关
+        - id: admin_router
+          uri: lb://renren-fast
+          predicates:
+            - Path=/api/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
+          #  http:localhost:88/api/** ---> http:localhost:8080/renren-fast/api/**
+
+
+
+#前端项目 /api/**
+# 解决方法 断言之后过滤掉api  路径重写
+# filters: - RewritePath=/api/(?<segment>.*),/gulimall-product/$\{segment}
+
+
+

@@ -9,11 +9,34 @@ spring:
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848 #配置nacos
+      config:
+        server-addr: 127.0.0.1:8848 #配置nacos
+    alicloud:
+      oss:
+        endpoint: oss-cn-shanghai.aliyuncs.com
+      access-key: LTAI5tMSzKKxKXrtbzFRYwGS
+      secret-key: yl4Zaa6TXQLO20Y8v2I9IDCCP6ZZUx
+  application:
+    name: gulimall-product #服务名称
+
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml
   global-config:
     db-config:
       id-type: auto
+      logic-delete-value: 1 #删除
+      logic-not-delete-value: 0 #未删除
 server:
   port: 10000
+
+logging:
+  level:
+    com.atgui.gulimall: debug
+
+
+

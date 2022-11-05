@@ -14,15 +14,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@Slf4j
 public class GulimallProductApplicationTests {
 
     @Autowired
     private BrandService brandService;
+
+
+    @Autowired
+    private  CategoryService categoryService;
+
+    @Test
+    public void testCatelogPath(){
+        Long[] catelogPath = categoryService.findCatelogPath(225L);
+        log.info("完整路径{}", Arrays.asList(catelogPath));
+    }
+
 
    @Test
    public void contextLoads() {
