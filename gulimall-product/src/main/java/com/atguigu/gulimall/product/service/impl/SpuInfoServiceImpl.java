@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.security.Key;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -147,7 +148,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 skuInfoService.saveSkuInfo(skuInfoEntity);
                 //获取sku自增id
                 Long skuId = skuInfoEntity.getSkuId();
-                List<SkuImagesEntity> imagesEntities = item.getImages().stream().map(img -> {
+                List<SkuImagesEntity> imagesEntities = item.getImages()
+                        .stream().map(img -> {
                     SkuImagesEntity skuImagesEntity = new SkuImagesEntity();
                     skuImagesEntity.setSkuId(skuId);
                     skuImagesEntity.setImgUrl(img.getImgUrl());
@@ -200,6 +202,49 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     @Override
     public void saveBaseSpkInfo(SpuInfoEntity spuInfoEntity) {
         this.baseMapper.insert(spuInfoEntity);
+    }
+
+    /**
+     * spu检索
+     * {
+     * key: '华为',//检索关键字
+     * catelogId: 6,//三级分类id
+     * brandId: 1,//品牌id
+     * status: 0,//商品状态
+     * }
+     *
+     * @param params
+     * @return
+     */
+    @Override
+    public PageUtils queryPageByCondition(Map<String, Object> params) {
+
+        QueryWrapper<SpuInfoEntity> wrapper = new QueryWrapper<>();
+        String key = (String) params.get("key");
+        if (!StringUtils.isBlank(key)) {
+            wrapper.and((w -> {
+                w.eq("id", key).or().like("spu_name", key);
+            }));
+        }
+        String status = (String) params.get("status");
+        if (!StringUtils.isBlank(status)) {
+            wrapper.eq("publish_status", status);
+        }
+        String brandId = (String) params.get("brandId");
+        if (!StringUtils.isBlank(brandId) && !brandId.equals("0")) {
+            wrapper.eq("brand_id", brandId);
+        }
+        String catelogId = (String) params.get("catelogId");
+        if (!StringUtils.isBlank(catelogId) && !catelogId.equals("0")) {
+            wrapper.eq("catalog_id", catelogId);
+        }
+
+        IPage<SpuInfoEntity> page = this.page(
+                new Query<SpuInfoEntity>().getPage(params),
+                wrapper
+        );
+
+        return new PageUtils(page);
     }
 
 
