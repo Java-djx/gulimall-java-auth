@@ -32,6 +32,7 @@ public class PurchaseDetailController {
 
     /**
      * 列表
+
      */
     @RequestMapping("/list")
     // @RequiresPermissions("ware:purchasedetail:list")
