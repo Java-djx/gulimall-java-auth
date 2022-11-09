@@ -3,6 +3,7 @@ package com.atguigu.gulimall.ware.service.impl;
 import com.atguigu.common.constant.WareConstant;
 import com.atguigu.gulimall.ware.entity.PurchaseDetailEntity;
 import com.atguigu.gulimall.ware.service.PurchaseDetailService;
+import com.atguigu.gulimall.ware.service.WareSkuService;
 import com.atguigu.gulimall.ware.vo.MergeVo;
 import com.atguigu.gulimall.ware.vo.PurchaseDoneVo;
 import com.atguigu.gulimall.ware.vo.PurchaseItemDoneVo;
@@ -35,6 +36,10 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
 
     @Autowired
     private PurchaseDetailService purchaseDetailService;
+
+    @Autowired
+    private WareSkuService wareSkuService;
+
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -143,28 +148,35 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
     @Transactional
     @Override
     public void done(PurchaseDoneVo purchaseDoneVo) {
-        //1.改变采购单的状态 如果全部采购项全部完成采购单才可以完成
         Long id = purchaseDoneVo.getId();
         //2、改变采购项的状态
         Boolean flag = true;
         List<PurchaseItemDoneVo> items = purchaseDoneVo.getItems();
-
         List<PurchaseDetailEntity> updates = new ArrayList<>();
-
         for (PurchaseItemDoneVo item : items) {
             PurchaseDetailEntity detailEntity = new PurchaseDetailEntity();
             if (item.getStatus() == WareConstant.PurchaseDetailStatusEnum.HASERROR.getCode()) {
                 flag = false;
                 detailEntity.setStatus(item.getStatus());
             } else {
+                //没有异常采购成功
                 detailEntity.setStatus(WareConstant.PurchaseDetailStatusEnum.FINISH.getCode());
+                //3、讲成功采购的进行入库
+                PurchaseDetailEntity entity = purchaseDetailService.getById(item.getItemId());
+                //入库修改库存
+                wareSkuService.addStock(entity.getSkuNum(), entity.getSkuId(), entity.getWareId());
             }
-
+            detailEntity.setId(item.getItemId());
             //
             updates.add(detailEntity);
         }
-
-        //3、讲成功采购的进行入库
+        purchaseDetailService.updateBatchById(updates);
+        //1.改变采购单的状态 如果全部采购项全部完成采购单才可以完成
+        PurchaseEntity purchaseEntity = new PurchaseEntity();
+        purchaseEntity.setId(id);
+        purchaseEntity.setStatus(flag ? WareConstant.PurchaseStatusEnum.FINISH.getCode() : WareConstant.PurchaseStatusEnum.HASERROR.getCode());
+        purchaseEntity.setUpdateTime(new Date());
+        this.updateById(purchaseEntity);
     }
 
 }
