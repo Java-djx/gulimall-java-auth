@@ -18,9 +18,19 @@ import java.util.Map;
  *
  * @author Mark sunlightcs@gmail.com
  */
-public class R extends HashMap<String, Object> {
+public class R<T> extends HashMap<String, Object> {
 	private static final long serialVersionUID = 1L;
-	
+
+	private T date;
+
+	public T getDate() {
+		return date;
+	}
+
+	public void setDate(T date) {
+		this.date = date;
+	}
+
 	public R() {
 		put("code", 0);
 		put("msg", "success");

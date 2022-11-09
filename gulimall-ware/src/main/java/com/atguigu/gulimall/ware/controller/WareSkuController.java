@@ -1,9 +1,11 @@
 package com.atguigu.gulimall.ware.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import com.atguigu.gulimall.ware.feign.ProductFeignService;
+import com.atguigu.gulimall.ware.vo.SkuHasStockVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +35,21 @@ public class WareSkuController {
 
     @Autowired
     private ProductFeignService productFeignService;
+
+
+    //查询sku是否有存库
+    @RequestMapping("/hasStock")
+    public R<List<SkuHasStockVo>> hasStock(@RequestParam List<Long> skuIds) {
+
+
+        List<SkuHasStockVo> vos = wareSkuService.getSkusHasStock(skuIds);
+
+        R ok = R.ok();
+        ok.setDate(vos);
+
+        return ok;
+    }
+
 
     /**
      * 列表

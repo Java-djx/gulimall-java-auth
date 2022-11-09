@@ -2,8 +2,10 @@ package com.atguigu.gulimall.search;
 
 import com.alibaba.fastjson.JSON;
 import com.atguigu.gulimall.search.config.GuliMallElasticsearchConfig;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mysql.cj.QueryBindings;
 import lombok.Data;
+import lombok.ToString;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -16,6 +18,12 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.AvgAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -86,27 +94,58 @@ public class GulimallSearchApplicationTests {
         request.indices("users");
         //构造查询执行对象
         SearchSourceBuilder builder = new SearchSourceBuilder();
-        builder.size(10);
-        builder.from(0);
 
-        builder.query(QueryBuilders.matchQuery("address","mill"));
+        builder.query(QueryBuilders.matchQuery("address", "mill"));
 
+        //构造聚合条件
+        //按照年龄的值聚合
+        TermsAggregationBuilder ageAgg = AggregationBuilders.terms("ageAgg").field("age");
+        builder.aggregation(ageAgg);
+        //计算平均值
+        AvgAggregationBuilder avg = AggregationBuilders.avg("balanceAvg").field("balance");
+        builder.aggregation(avg);
 
 
         //检索数据源
         SearchRequest source = request.source(builder);
         //返回的数据
         SearchResponse response = client.search(source, GuliMallElasticsearchConfig.COMMON_OPTIONS);
-        System.out.println(response.getTotalShards());
+
+        //分析数据
         SearchHits hits = response.getHits();
-        for (SearchHit hit : hits) {
-            System.out.println(hit.getSourceAsString());
+
+        SearchHit[] searchHits = hits.getHits();
+
+        for (SearchHit hit : searchHits) {
+
+            String sourceAsString = hit.getSourceAsString();
+            Account account = JSON.parseObject(sourceAsString, Account.class);
+            System.out.println("account = " + account);
+
         }
 
-        System.out.println(response.toString());
+        Aggregations aggregations = response.getAggregations();
+
+
 
     }
 
+
+    @Data
+    @ToString
+   static class Account {
+        private int accountNumber;
+        private int balance;
+        private String firstname;
+        private String lastname;
+        private int age;
+        private String gender;
+        private String address;
+        private String employer;
+        private String email;
+        private String city;
+        private String state;
+    }
 
     @Data
     class User {
