@@ -1,4 +1,4 @@
-package com.atguigu.gulimall.product.controller;
+package com.atguigu.gulimall.product.app;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -38,8 +38,6 @@ public class SpuInfoController {
     public R spuUp(@PathVariable("spuId") Long spuId) {
 
         spuInfoService.up(spuId);
-
-
 
         return R.ok();
     }

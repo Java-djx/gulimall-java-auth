@@ -39,15 +39,11 @@ public class WareSkuController {
 
     //查询sku是否有存库
     @RequestMapping("/hasStock")
-    public R<List<SkuHasStockVo>> hasStock(@RequestParam List<Long> skuIds) {
-
+    public R hasStock(@RequestParam List<Long> skuIds) {
 
         List<SkuHasStockVo> vos = wareSkuService.getSkusHasStock(skuIds);
 
-        R ok = R.ok();
-        ok.setDate(vos);
-
-        return ok;
+        return R.ok().setDate(vos);
     }
 
 

@@ -50,6 +50,13 @@ spring:
             - RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
           #  http:localhost:88/api/** ---> http:localhost:8080/renren-fast/api/**
 
+        #nginx 谷粒网关
+        - id: gulimall_host_route
+          uri: lb://gulimall-product
+          predicates:
+            - Host=**.gulimall.com,gulimall.com
+        #安装Host进行路由
+
 
 
 #前端项目 /api/**

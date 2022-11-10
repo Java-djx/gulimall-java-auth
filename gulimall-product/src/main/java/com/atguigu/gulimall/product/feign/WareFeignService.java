@@ -27,6 +27,6 @@ public interface WareFeignService {
      * 查询sku是否有存库
      */
     @RequestMapping("/ware/waresku/hasStock")
-    R<List<SkuHasStockVo>> hasStock(@RequestParam List<Long> skuIds);
+    R hasStock(@RequestParam List<Long> skuIds);
 
 }

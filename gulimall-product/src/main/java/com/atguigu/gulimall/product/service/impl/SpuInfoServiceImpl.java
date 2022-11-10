@@ -1,5 +1,6 @@
 package com.atguigu.gulimall.product.service.impl;
 
+import com.alibaba.fastjson.TypeReference;
 import com.atguigu.common.constant.ProductConstant;
 import com.atguigu.common.to.SkuReductionTo;
 import com.atguigu.common.to.SpuBoundTo;
@@ -34,6 +35,16 @@ import com.atguigu.gulimall.product.dao.SpuInfoDao;
 import org.springframework.transaction.annotation.Transactional;
 
 
+/**
+ * 1、构造请求数据,将对象转成JSON
+ *
+ * 2、发送请求进行执行,（执行成功会解码响应数据）
+ *
+ * 3、执行请求会有重试机制
+ *      如果执行没成功继续执行 超出次数抛出异常
+ *      有异常直接抛出异常
+ *
+ */
 @Service("spuInfoService")
 @Slf4j
 public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> implements SpuInfoService {
@@ -65,7 +76,6 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     //sku和属性关联服务
     @Autowired
     private SkuSaleAttrValueService skuSaleAttrValueService;
-
 
     //品牌
     @Autowired
@@ -290,17 +300,6 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             return item.getSkuId();
         }).collect(Collectors.toList());
 
-        Map<Long, Boolean> stockMap = null;
-        try {
-            //4, TODO 查询当前SKU可以检索规格属性
-            R<List<SkuHasStockVo>> stocks = wareFeignService.hasStock(skuIds);
-            //筛选收据
-            List<SkuHasStockVo> date = stocks.getDate();
-            stockMap = date.stream().collect(Collectors.toMap(SkuHasStockVo::getSkuId, item -> item.getHasStock()));
-        } catch (Exception e) {
-            log.error("库存服务查询异常,原因:{}", e);
-        }
-
         //查询全部
         List<ProductAttrValueEntity> baseAttrs = attrValueService.baseAttrByProductId(spuId);
         //筛选数据全部属性id 属性id查询可以被检索的属性
@@ -319,6 +318,20 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             return attrs;
         }).collect(Collectors.toList());
 
+        Map<Long, Boolean> stockMap = null;
+        try {
+            //4, TODO 查询当前SKU可以检索规格属性
+            R stocks = wareFeignService.hasStock(skuIds);
+            TypeReference<List<SkuHasStockVo>> typeReference = new TypeReference<List<SkuHasStockVo>>() {
+            };
+            //筛选收据
+            stockMap = stocks.getDate(typeReference)
+                    .stream()
+                    .collect(Collectors.toMap(SkuHasStockVo::getSkuId, item -> item.getHasStock()));
+        } catch (Exception e) {
+            log.error("库存服务查询异常,原因:{}", e);
+        }
+
         //组装数据
         Map<Long, Boolean> finalStockMap = stockMap;
         List<SkuEsModel> esModelList = skus.stream().map(item -> {
@@ -332,8 +345,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             //hasStock hotScore
             //1. TODO 发送远程调用库存系统查询是否存在库存
             //在map中寻找数据 对于是否有库存
-            if (finalStockMap == null) {
-                esModel.setHasStock(true);
+            if (null == finalStockMap) {
+                esModel.setHasStock(false);
             } else {
                 esModel.setHasStock(finalStockMap.get(item.getSkuId()));
             }
@@ -354,7 +367,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
         //TODO 发送给ES进行保存 属性模型 gulimall-search 保存
         try {
-            R r = searchFeignService.productStatusUp(upProducts);
+            R r = searchFeignService.productStatusUp(esModelList);
             if (r.getCode() == 0) {
                 log.info("远程调用ES服务保存商品成功");
                 //TODO 6、ES保存成功改变当前SPU发布状态 已上架

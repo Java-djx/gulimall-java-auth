@@ -22,6 +22,12 @@ spring:
       secret-key: yl4Zaa6TXQLO20Y8v2I9IDCCP6ZZUx
   application:
     name: gulimall-product #服务名称
+  thymeleaf:
+    cache: false
+  redis:
+    port: 6379
+    host: 192.168.184.129
+
 
 
 mybatis-plus:
@@ -37,6 +43,7 @@ server:
 logging:
   level:
     com.atgui.gulimall: debug
+
 
 
 

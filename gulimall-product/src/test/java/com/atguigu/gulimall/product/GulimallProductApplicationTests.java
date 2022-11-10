@@ -1,7 +1,6 @@
 package com.atguigu.gulimall.product;
 
 
-
 import com.atguigu.gulimall.product.entity.BrandEntity;
 import com.atguigu.gulimall.product.entity.CategoryEntity;
 import com.atguigu.gulimall.product.service.BrandService;
@@ -12,6 +11,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.FileInputStream;
@@ -19,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 
 @RunWith(SpringRunner.class)
@@ -31,17 +33,20 @@ public class GulimallProductApplicationTests {
 
 
     @Autowired
-    private  CategoryService categoryService;
+    private CategoryService categoryService;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     @Test
-    public void testCatelogPath(){
+    public void testCatelogPath() {
         Long[] catelogPath = categoryService.findCatelogPath(225L);
         log.info("完整路径{}", Arrays.asList(catelogPath));
     }
 
 
-   @Test
-   public void contextLoads() {
+    @Test
+    public void contextLoads() {
 
 //        BrandEntity brandEntity=new BrandEntity();
 //        brandEntity.setDescript("华为手机把把C");
@@ -54,16 +59,33 @@ public class GulimallProductApplicationTests {
 //        }
 //       brandService.updateById(brandEntity);
 
-       QueryWrapper<BrandEntity> queryWrapper = new QueryWrapper<BrandEntity>();
+        QueryWrapper<BrandEntity> queryWrapper = new QueryWrapper<BrandEntity>();
 
-       queryWrapper.eq("name","华为");
+        queryWrapper.eq("name", "华为");
 
 
-       List<BrandEntity> list = brandService.list(queryWrapper);
-       list.forEach((item)->{
-           System.out.println(item);
-       });
+        List<BrandEntity> list = brandService.list(queryWrapper);
+        list.forEach((item) -> {
+            System.out.println(item);
+        });
 
-   }
+    }
+
+    /**
+     * 使用Redis
+     */
+    @Test
+    public void testRedisCache() {
+
+        ValueOperations<String, String> opsForValue = stringRedisTemplate.opsForValue();
+
+        //保存字符串
+        opsForValue.set("hello", "world"+ UUID.randomUUID().toString());
+
+        String hello = opsForValue.get("hello");
+
+        System.out.println("hello = " + hello);
+
+    }
 
 }

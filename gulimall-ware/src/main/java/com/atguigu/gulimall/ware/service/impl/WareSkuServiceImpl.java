@@ -78,8 +78,6 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             } finally {
 
             }
-
-
             this.baseMapper.insert(wareSkuEntity);
         } else {
             this.baseMapper.addStock(skuNum, skuId, wareId);
@@ -91,9 +89,9 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         List<SkuHasStockVo> skuHasStockVos = skuIds.stream().map(item -> {
             SkuHasStockVo vo = new SkuHasStockVo();
             //查询当前库存的总库存
-            Long count=this.baseMapper.getSkuStock(item);
+            Long count = this.baseMapper.getSkuStock(item);
             vo.setSkuId(item);
-            vo.setHasStock(count>0);
+            vo.setHasStock(count == null ? false : count > 0);
             return vo;
         }).collect(Collectors.toList());
 
