@@ -259,6 +259,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
      */
     private Map<String, List<Catalog2Vo>> getDataFromDb() {
         String catelogJson = redisTemplate.opsForValue().get("catelogJson");
+        log.info("aaa");
         if (!StringUtils.isEmpty(catelogJson)) {
             //4、逆转成需要的数据 指定的对象
             Map<String, List<Catalog2Vo>> result = JSON.parseObject(catelogJson, new TypeReference<Map<String, List<Catalog2Vo>>>() {
