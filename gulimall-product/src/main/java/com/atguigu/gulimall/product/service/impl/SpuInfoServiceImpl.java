@@ -314,7 +314,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             return idSet.contains(item.getAttrId());
         }).map(item -> {
             SkuEsModel.Attrs attrs = new SkuEsModel.Attrs();
-            BeanUtils.copyProperties(item, attrIds);
+            BeanUtils.copyProperties(item, attrs);
             return attrs;
         }).collect(Collectors.toList());
 
@@ -353,7 +353,6 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
             //2. TODO 2,热度评分.0
             esModel.setHotScore(0L);
-
             //3, TODO 查询品牌和分类的消息
             BrandEntity brand = brandService.getById(esModel.getBrandId());
             esModel.setBrandName(brand.getName());

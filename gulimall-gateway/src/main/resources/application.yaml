@@ -54,8 +54,13 @@ spring:
         - id: gulimall_host_route
           uri: lb://gulimall-product
           predicates:
-            - Host=**.gulimall.com,gulimall.com
+            - Host=gulimall.com
         #安装Host进行路由
+        #nginx search
+        - id: gulimall_search_route
+          uri: lb://gulimall-search
+          predicates:
+            - Host=search.gulimall.com
 
 
 
