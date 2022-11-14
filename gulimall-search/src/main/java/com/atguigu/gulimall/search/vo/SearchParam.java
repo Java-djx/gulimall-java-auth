@@ -19,8 +19,7 @@ import java.util.List;
  * 4、聚合：attrs
  * <p>
  * 完整查询路径:keyword=小米
- * &sort=saleCount_desc/asc&hasStock=0/1&skuPrice=400_1900&brandId=1&catalog3Id=1&at
- * trs=1_3G:4G:5G&attrs=2_骁龙845&attrs=4_高清屏
+ * &sort=saleCount_desc/asc&hasStock=0/1&skuPrice=400_1900&brandId=1&catalog3Id=1&attrs=1_3G:4G:5G&attrs=2_骁龙845&attrs=4_高清屏
  */
 @Data
 public class SearchParam {
@@ -30,7 +29,6 @@ public class SearchParam {
 
 
     private Long catalog3Id; //三级分类ID
-
 
     /**
      * sort=saleCount_desc/asc 销量
@@ -46,8 +44,7 @@ public class SearchParam {
      * skuPrice=1_500/_500/500_
      *
      */
-
-    private Integer hasStock;//是否有货
+    private Integer hasStock=1;//是否有货 0：无库存 1：有库存
 
     private String skuPrice;//价格区间
 
@@ -55,7 +52,7 @@ public class SearchParam {
 
     private List<String> attrs;//按照属性进行筛选
 
-    private Integer pageNum;//页码
+    private Integer pageNum=1;//页码
 
 
 }

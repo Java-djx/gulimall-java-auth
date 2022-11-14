@@ -14,6 +14,6 @@ public interface MallSearchService {
      * @param searchParam 检索的所有参数
      * @return 检索的结果 包含页面的所有消息
      */
-    SearchResult search(SearchParam searchParam);
+   public SearchResult search(SearchParam searchParam);
 
 }

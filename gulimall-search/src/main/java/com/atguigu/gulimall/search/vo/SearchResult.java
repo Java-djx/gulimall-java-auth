@@ -1,7 +1,9 @@
 package com.atguigu.gulimall.search.vo;
 
 import com.atguigu.common.to.es.SkuEsModel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -18,7 +20,6 @@ public class SearchResult {
      * 查询到商品数据
      */
     private List<SkuEsModel> products;
-
 
     /**
      * 以下是分页消息
@@ -50,13 +51,15 @@ public class SearchResult {
      * 属性数据
      */
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class AttrVo {
 
         private Long attrId;
 
         private String attrName;
 
-        private String attrValue;
+        private List<String>  attrValue;
     }
 
     /**
