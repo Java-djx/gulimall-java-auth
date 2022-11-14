@@ -9,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @version 1.0
  * @author: djx
@@ -28,8 +30,8 @@ public class SearchController {
      * @return
      */
     @GetMapping({"/list.html", "/"})
-    public String PageList(SearchParam param, Model model) {
-
+    public String PageList(SearchParam param, Model model, HttpServletRequest request) {
+        param.set_queryString(request.getQueryString());
         //1、根据页面传递的参数去ES检索结果
         SearchResult result = mallSearchService.search(param);
         model.addAttribute("result", result);

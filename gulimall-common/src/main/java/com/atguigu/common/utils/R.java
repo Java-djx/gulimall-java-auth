@@ -24,6 +24,17 @@ public class R extends HashMap<String, Object> {
 
     private static final long serialVersionUID = 1L;
 
+
+    public <T> T getDate(String name,TypeReference<T> tTypeReference) {
+        Object data = get(name); //默认map类型
+        //装成json
+        String toJSONString = JSON.toJSONString(data);
+        //逆转回想要的类型
+        T t = JSON.parseObject(toJSONString, tTypeReference);
+
+        return t;
+    }
+
     public <T> T getDate(TypeReference<T> tTypeReference) {
         Object data = get("data"); //默认map类型
         //装成json

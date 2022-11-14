@@ -1,19 +1,18 @@
 package com.atguigu.gulimall.product.app;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
 import com.atguigu.common.valid.AddGroup;
 import com.atguigu.common.valid.UpdateGroup;
 import com.atguigu.common.valid.UpdateStatusGroup;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.atguigu.gulimall.product.entity.BrandEntity;
 import com.atguigu.gulimall.product.service.BrandService;
@@ -45,6 +44,12 @@ public class BrandController {
         return R.ok().put("page", page);
     }
 
+    @GetMapping("/infos")
+    @Cacheable(value = "brands", key = "#root.methodName")
+    public R infos(@RequestParam("brandIds") List<Long> brandIds) {
+        List<BrandEntity> list = brandService.list(new QueryWrapper<BrandEntity>().in("brand_id", brandIds));
+        return R.ok().put("data", list);
+    }
 
     /**
      * 信息
@@ -58,12 +63,13 @@ public class BrandController {
 
     /**
      * 保存
-     *  @Validated({AddGroup.class} 规则分组
+     *
+     * @Validated({AddGroup.class} 规则分组
      */
     @RequestMapping(value = "/save")
     //@RequiresPermissions("product:brand:save")
     public R save(@Validated({AddGroup.class})
-                      @RequestBody BrandEntity brand/*, BindingResult result*/) {
+                  @RequestBody BrandEntity brand/*, BindingResult result*/) {
 
 //        Map<String, String> map = new HashMap<String, String>();
 //        if (result.hasErrors()) {

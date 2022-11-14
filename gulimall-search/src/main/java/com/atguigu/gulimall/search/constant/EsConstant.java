@@ -11,6 +11,6 @@ public class EsConstant {
     public static final String PRODUCT_INDEX = "gulimall_product"; //锁定商品在ES中索引
 
 
-    public static final Integer PRODUCT_SIZE = 2; //每页展示的数据
+    public static final Integer PRODUCT_SIZE = 16; //每页展示的数据
 
 }

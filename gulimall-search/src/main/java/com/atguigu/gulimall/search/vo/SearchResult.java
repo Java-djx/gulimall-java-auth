@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,12 +28,22 @@ public class SearchResult {
     private Integer pageNum;//当前页码
     private Long total;//总记录数
     private Integer totalPages;//总页码
+    private List<Integer> pageNavs;//页面循环的页码
 
     private List<BrandVo> brands;//查询结果中 涉及的品牌消息
     private List<AttrVo> attrs;//查询结果中 涉及的属性消息
     private List<CatalogVo> catalogs;//查询结果中 涉及的分类消息
-
     //============ 以上是返回给页面的所有消息 =====================
+    private List<NavVo> navs=new ArrayList<NavVo>();//面包屑导航
+    private List<Long> attrIds=new ArrayList<>();
+
+    @Data
+    public static class  NavVo{
+        private String navName;
+        private String navValue;
+        private String link;
+    }
+
 
     /**
      * 品牌静态内部类

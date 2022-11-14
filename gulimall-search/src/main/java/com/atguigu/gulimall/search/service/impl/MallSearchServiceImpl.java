@@ -1,10 +1,15 @@
 package com.atguigu.gulimall.search.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.atguigu.common.to.es.SkuEsModel;
+import com.atguigu.common.utils.R;
 import com.atguigu.gulimall.search.config.GuliMallElasticsearchConfig;
 import com.atguigu.gulimall.search.constant.EsConstant;
+import com.atguigu.gulimall.search.feigin.ProductFeignService;
 import com.atguigu.gulimall.search.service.MallSearchService;
+import com.atguigu.gulimall.search.vo.AttrResponseVo;
+import com.atguigu.gulimall.search.vo.BrandVo;
 import com.atguigu.gulimall.search.vo.SearchParam;
 import com.atguigu.gulimall.search.vo.SearchResult;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,6 +56,9 @@ public class MallSearchServiceImpl implements MallSearchService {
     @Autowired
     private RestHighLevelClient client;
 
+    @Autowired
+    private ProductFeignService productFeignService;
+
     @Override
     public SearchResult search(SearchParam searchParam) {
         //1、动态构造查询条件
@@ -64,9 +74,67 @@ public class MallSearchServiceImpl implements MallSearchService {
             exception.printStackTrace();
         }
         log.info("检索返回的数据:{}", result);
+        //构造面包屑导航
+        if (searchParam.getAttrs() != null && searchParam.getAttrs().size() > 0) {
 
+            //设置面包的内容
+            SearchResult finalResult = result;
+            List<SearchResult.NavVo> navVos = searchParam.getAttrs().stream().map(attr -> {
+                //分析每一个attrs
+                SearchResult.NavVo navVo = new SearchResult.NavVo();
+                //attrs=1_3G:4G:5G
+                String[] att = attr.split("_");
+                navVo.setNavValue(att[1]);
+                R r = productFeignService.attrInfo(Long.parseLong(att[0]));
+                finalResult.getAttrIds().add(Long.parseLong(att[0]));
+
+                if (r.getCode() == 0) {
+                    AttrResponseVo date = r.getDate("attr", new TypeReference<AttrResponseVo>() {
+                    });
+                    navVo.setNavName(date.getAttrName());
+                } else {
+                    navVo.setNavName(att[0]);
+                }
+                String replace = replaceQueryString(searchParam, attr, "attrs");
+                navVo.setLink("http://search.gulimall.com/list.html?" + replace);
+                return navVo;
+            }).collect(Collectors.toList());
+            result.setNavs(navVos);
+            if (searchParam.getBrandId() != null && searchParam.getBrandId().size() > 0) {
+                List<SearchResult.NavVo> navs = result.getNavs();
+                SearchResult.NavVo navVo = new SearchResult.NavVo();
+                navVo.setNavName("品牌");
+                //TODO 远程查询所有品牌
+                R r = productFeignService.BrandsInfos(searchParam.getBrandId());
+                if (r.getCode() == 0) {
+                    List<BrandVo> date = r.getDate(new TypeReference<List<BrandVo>>() {
+                    });
+                    StringBuffer stringBuffer = new StringBuffer();
+                    String replace = "";
+                    for (BrandVo brandVo : date) {
+                        stringBuffer.append(brandVo.getBrandName() + ";");
+                        replace = replaceQueryString(searchParam, brandVo.getBrandId() + "", "brandId");
+                    }
+                    navVo.setNavValue(stringBuffer.toString());
+                    navVo.setLink("http://search.gulimall.com/list.html?" + replace);
+                }
+                navs.add(navVo);
+            }
+        }
         return result;
+    }
 
+    private String replaceQueryString(SearchParam searchParam, String value, String key) {
+        String encode = null;
+        try {
+            encode = URLEncoder.encode(value, "UTF-8");
+            encode.replace("+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        ;
+        //2、取消了面包屑以后我们要跳转到什么地方，讲请求地址的url制空
+        return searchParam.get_queryString().replace("&" + key + "=" + encode, "");
     }
 
     /**
@@ -98,6 +166,8 @@ public class MallSearchServiceImpl implements MallSearchService {
         }
         //1、返回的所有查询的商品
         searchResult.setProducts(esModels);
+
+
         //2、当前商品涉及的所有属性消息
         List<SearchResult.AttrVo> attrVos = new ArrayList<SearchResult.AttrVo>();
         ParsedNested attr_agg = response.getAggregations().get("attr_agg");
@@ -116,6 +186,7 @@ public class MallSearchServiceImpl implements MallSearchService {
                         return keyAsString;
                     }).collect(Collectors.toList());
             SearchResult.AttrVo attrVo = new SearchResult.AttrVo(attrId, attrName, attrValues);
+
             attrVos.add(attrVo);
         }
         searchResult.setAttrs(attrVos);
@@ -134,7 +205,7 @@ public class MallSearchServiceImpl implements MallSearchService {
             brandVo.setBrandName(brand_name_agg.getBuckets().get(0).getKeyAsString());
             //得到并设置品牌的图片
             ParsedStringTerms brand_img_agg = bucket.getAggregations().get("brand_img_agg");
-            brandVo.setBrandName(brand_img_agg.getBuckets().get(0).getKeyAsString());
+            brandVo.setBrandImg(brand_img_agg.getBuckets().get(0).getKeyAsString());
             brandVos.add(brandVo);
         }
         searchResult.setBrands(brandVos);
@@ -165,6 +236,12 @@ public class MallSearchServiceImpl implements MallSearchService {
                         ((int) total / EsConstant.PRODUCT_SIZE + 1);
         searchResult.setTotalPages(totalPages);
 
+        //页码
+        List<Integer> pageNavs = new ArrayList<>();
+        for (Integer i = 1; i <= totalPages; i++) {
+            pageNavs.add(i);
+        }
+        searchResult.setPageNavs(pageNavs);
         return searchResult;
     }
 
@@ -205,19 +282,20 @@ public class MallSearchServiceImpl implements MallSearchService {
                 //3G:4G:5G
                 String[] attrValues = s[1].split(":");
                 nestedBoolBuilder.must(QueryBuilders.termQuery("attrs.attrId", attrId));
-                nestedBoolBuilder.must(QueryBuilders.termQuery("attrs.attrValue", attrValues));
+                nestedBoolBuilder.must(QueryBuilders.termsQuery("attrs.attrValue", attrValues));
                 //每一个都必须生成一个切入的查询条件
                 NestedQueryBuilder nestedQuery = QueryBuilders.nestedQuery("attrs", nestedBoolBuilder, ScoreMode.None);
                 boolQuery.filter(nestedQuery);
             }
         }
-        //1.2 bool-filter 按照 是否存在库存查询
-        boolQuery.filter(QueryBuilders.termQuery("hasStock", param.getHasStock() == 1));
+        if (param.getHasStock() != null) {
+            //1.2 bool-filter 按照 是否存在库存查询
+            boolQuery.filter(QueryBuilders.termQuery("hasStock", param.getHasStock() == 1));
+        }
         //1.2 bool-filter 按照 价格区间 查询
         if (!StringUtils.isEmpty(param.getSkuPrice())) {
             //skuPrice=1_500/_500/500_
             RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery("skuPrice");
-
             String[] s = param.getSkuPrice().split("_");
             if (s.length == 2) {
                 //区间

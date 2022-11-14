@@ -27,7 +27,6 @@ public class SearchParam {
 
     private String keyword;//全文匹配关键字 全文检索
 
-
     private Long catalog3Id; //三级分类ID
 
     /**
@@ -42,9 +41,8 @@ public class SearchParam {
      * hasStock（是否有货）、skuPrice区间、brandId、catalog3Id、attrs
      * hasStock=0/1
      * skuPrice=1_500/_500/500_
-     *
      */
-    private Integer hasStock=1;//是否有货 0：无库存 1：有库存
+    private Integer hasStock;//是否有货 0：无库存 1：有库存
 
     private String skuPrice;//价格区间
 
@@ -52,7 +50,10 @@ public class SearchParam {
 
     private List<String> attrs;//按照属性进行筛选
 
-    private Integer pageNum=1;//页码
+    private Integer pageNum = 1;//页码
+
+
+    private String _queryString;//原生的查询条件
 
 
 }
