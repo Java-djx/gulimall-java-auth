@@ -5,6 +5,9 @@ import com.atguigu.gulimall.product.entity.BrandEntity;
 import com.atguigu.gulimall.product.entity.CategoryEntity;
 import com.atguigu.gulimall.product.service.BrandService;
 import com.atguigu.gulimall.product.service.CategoryService;
+import com.atguigu.gulimall.product.service.SkuInfoService;
+import com.atguigu.gulimall.product.vo.SkuItemVo;
+import com.atguigu.gulimall.product.vo.SpuItemAttrGroupVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -22,6 +25,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 
 @RunWith(SpringRunner.class)
@@ -41,6 +45,22 @@ public class GulimallProductApplicationTests {
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Autowired
+    private SkuInfoService skuInfoService;
+
+
+    @Test
+    public void skuInfoInfo() throws ExecutionException, InterruptedException {
+        SkuItemVo item = skuInfoService.item(3L);
+
+        List<SpuItemAttrGroupVo> attrGroupAttrs = item.getAttrGroupAttrs();
+        attrGroupAttrs.forEach(spuItemAttrGroupVo ->
+        {
+            System.out.println(spuItemAttrGroupVo);
+        });
+    }
+
 
 
     @Test

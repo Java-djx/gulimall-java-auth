@@ -767,7 +767,8 @@
         </div>
         <div class="JD_ipone_one c">
             <!-- 遍历面包屑功能 -->
-            <a th:href="${nav.link}" th:each="nav:${result.navs}"><span th:text="${nav.navName}"></span>：<span th:text="${nav.navValue}"></span> x</a>
+            <a th:href="${nav.link}" th:each="nav:${result.navs}"><span th:text="${nav.navName}"></span>：<span
+                    th:text="${nav.navValue}"></span> x</a>
         </div>
         <i><img src="/static/search/image/right-@1x.png" alt=""></i>
     </div>
@@ -784,8 +785,8 @@
             </div>
             <div class="JD_nav_logo" th:with="brandId= ${param.brandId}">
                 <!--品牌-->
-                <div    th:if="${#strings.isEmpty(brandId)}"
-                      class="JD_nav_wrap">
+                <div th:if="${#strings.isEmpty(brandId)}"
+                     class="JD_nav_wrap">
                     <div class="sl_key">
                         <span><b>品牌：</b></span>
                     </div>
@@ -847,7 +848,8 @@
                 </div>
 
                 <!--其他所有需要展示的属性-->
-                <div th:each=" attr:${result.attrs}" th:if="${!#lists.contains(result.attrIds,attr.attrId)}" class="JD_pre">
+                <div th:each=" attr:${result.attrs}" th:if="${!#lists.contains(result.attrIds,attr.attrId)}"
+                     class="JD_pre">
                     <div class="sl_key">
                         <span th:text="${attr.attrName}">屏幕尺寸：</span>
                     </div>
@@ -1217,14 +1219,14 @@
                                 <a href="/static/search/#">关注</a>
                             </div>
                             <p class="da">
-                                <a href="/static/search/#"
+                                <a th:href="|http://item.gulimall.com/${product.skuId}.html|"
                                    title="购买AppleCare+，获得原厂2年整机保修(含电池)，和多达2次意外损坏的保修服务。购买勾选：保障服务、原厂保2年。">
                                     <img th:src="${product.getSkuImg()}" src="/static/search/img/57d0d400Nfd249af4.jpg"
                                          class="dim">
                                 </a>
                             </p>
                             <ul class="tab_im">
-                                <li><a href="/static/search/#" title="黑色">
+                                <li><a th:href="|http://item.gulimall.com/${product.skuId}.html|" title="黑色">
                                     <img th:src="${product.getSkuImg()}"
                                          src="/static/search/img/57d0d400Nfd249af4.jpg"></a>
                                 </li>
@@ -1233,7 +1235,7 @@
                                 <span th:text="'¥'+${product.getSkuPrice()}"> ¥5199.00</span>
                             </p>
                             <p class="tab_JE">
-                                <a href="/static/search/#"
+                                <a th:href="|http://item.gulimall.com/${product.skuId}.html|"
                                    th:utext="${product.skuTitle}">
                                     Apple iPhone 7 Plus (A1661) 32G 黑色 移动联通电信4G手机
                                 </a>
@@ -1241,7 +1243,8 @@
                             <p class="tab_PI">已有<span>11万+</span>热门评价
                                 <a href="/static/search/#">二手有售</a>
                             </p>
-                            <p class="tab_CP"><a href="/static/search/#" title="谷粒商城Apple产品专营店">谷粒商城Apple产品...</a>
+                            <p class="tab_CP"><a th:href="|http://item.gulimall.com/${product.skuId}.html|"
+                                                 title="谷粒商城Apple产品专营店">谷粒商城Apple产品...</a>
                                 <a href='#' title="联系供应商进行咨询">
                                     <img src="/static/search/img/xcxc.png">
                                 </a>

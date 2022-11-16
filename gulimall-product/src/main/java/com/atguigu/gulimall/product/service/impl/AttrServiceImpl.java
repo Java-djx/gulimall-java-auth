@@ -220,8 +220,10 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     @Override
     public List<AttrEntity> getRelationAttr(Long attrgroupId) {
         //根据分组id查询属性id
-        List<AttrAttrgroupRelationEntity> relationEntities = attrAttrgroupRelationDao.selectList(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_group_id", attrgroupId));
-
+        List<AttrAttrgroupRelationEntity> relationEntities =
+                attrAttrgroupRelationDao.selectList
+                        (new QueryWrapper<AttrAttrgroupRelationEntity>()
+                                .eq("attr_group_id", attrgroupId));
         //属性id
         List<Long> attrIds = relationEntities.stream().map((attr) -> {
             return attr.getAttrId();
