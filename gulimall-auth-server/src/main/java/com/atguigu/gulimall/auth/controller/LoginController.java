@@ -18,9 +18,4 @@ public class LoginController {
         return "login";
     }
 
-    @GetMapping({"/reg.html"})
-    public String pageGotoReg(){
-        return "reg";
-    }
-
 }
