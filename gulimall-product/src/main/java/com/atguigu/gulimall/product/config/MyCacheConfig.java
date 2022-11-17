@@ -37,12 +37,9 @@ public class MyCacheConfig {
     public RedisCacheConfiguration redisCacheConfiguration(CacheProperties cacheProperties) {
 
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
-
         //修改缓存的值和建 序列化方式
         config = config.serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()));
-
         config = config.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
-
         CacheProperties.Redis redisProperties = cacheProperties.getRedis();
         //讲配置文件中配置全部生效
         if (redisProperties.getTimeToLive() != null) {
@@ -57,7 +54,6 @@ public class MyCacheConfig {
         if (!redisProperties.isUseKeyPrefix()) {
             config = config.disableKeyPrefix();
         }
-
         return config;
     }
 

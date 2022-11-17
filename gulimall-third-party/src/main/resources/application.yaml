@@ -9,6 +9,13 @@ spring:
       oss:
         endpoint: oss-cn-shanghai.aliyuncs.com
         bucket: gulimall-djx
+      sms:
+        host: https://dfsns.market.alicloudapi.com
+        path: /data/send_sms
+        skin: 1
+        sign: 175622
+        appcode: 64c7f8ed478c4e85aec9e0f973e7e2ff
+
 
 
   application:
