@@ -58,7 +58,6 @@ public class CouponController {
         couponEntity.setNum(500);
         couponEntity.setAmount(BigDecimal.valueOf(15));
         couponEntity.setCouponName("满100减10");
-
         return R.ok().put("coupons", Arrays.asList(couponEntity));
     }
 

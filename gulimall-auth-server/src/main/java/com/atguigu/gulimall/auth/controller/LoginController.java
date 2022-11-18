@@ -1,21 +1,29 @@
 package com.atguigu.gulimall.auth.controller;
 
+import com.alibaba.fastjson.TypeReference;
 import com.atguigu.common.exception.BizCodeEnume;
 import com.atguigu.common.utils.R;
 import com.atguigu.gulimall.auth.constant.AuthServerConstant;
+import com.atguigu.gulimall.auth.feigin.MemberFeignService;
 import com.atguigu.gulimall.auth.feigin.ThirdPartFeignService;
+import com.atguigu.gulimall.auth.vo.UserLoginVo;
+import com.atguigu.gulimall.auth.vo.UserRegisterVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @version 1.0
@@ -31,6 +39,10 @@ public class LoginController {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
+
+    @Autowired
+    private MemberFeignService memberFeignService;
 
     @GetMapping({"/login.html", "/"})
     public String loginPage() {
@@ -57,10 +69,83 @@ public class LoginController {
             }
         }
         //2、存入redis 三分钟有效 key sms:code:phone
-        String code = UUID.randomUUID().toString().substring(0, 5) + "_" + System.currentTimeMillis();
+        int code = (int) ((Math.random() * 9 + 1) * 100000);
+        String codeNum = String.valueOf(code);
+        String substring = code + "_" + System.currentTimeMillis();
         //3、防止重复发送
-        redisTemplate.opsForValue().set(AuthServerConstant.SMS_CODE_CACHE_PREFIX + phone, code, 3, TimeUnit.MINUTES);
-        return thirdPartFeignService.sendCode(phone, code);
+        redisTemplate.opsForValue().set(AuthServerConstant.SMS_CODE_CACHE_PREFIX + phone, substring, 5, TimeUnit.MINUTES);
+        return thirdPartFeignService.sendCode(phone, String.valueOf(code));
+    }
+
+    @PostMapping(value = "/register")
+    public String register(@Valid UserRegisterVo vos, BindingResult result,
+                           RedirectAttributes attributes) {
+        //如果有错误回到注册页面
+        if (result.hasErrors()) {
+            Map<String, String> errors = result.getFieldErrors().stream().collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
+            attributes.addFlashAttribute("errors", errors);
+            //效验出错回到注册页面
+            return "redirect:http://auth.gulimall.com/reg.html";
+        }
+        //1.校验验证码
+        String redisCode = redisTemplate.opsForValue().get(AuthServerConstant.SMS_CODE_CACHE_PREFIX + vos.getPhone());
+        if (!StringUtils.isEmpty(redisCode)) {
+            // 拆分验证码
+            String s = redisCode.split("_")[0];
+            if (vos.getCode().equalsIgnoreCase(s)) {
+                //删除令牌机制 令牌机制
+                redisTemplate.delete(AuthServerConstant.SMS_CODE_CACHE_PREFIX + vos.getPhone());
+                //真正注册调用远程服务
+                R r = memberFeignService.regist(vos);
+                if (r.getCode() == 0) {
+                    //成功
+                    return "redirect:http://auth.gulimall.com/login.html";
+                } else {
+                    //失败
+                    String date = r.getDate("msg", new TypeReference<String>() {
+                    });
+                    Map<String, String> errors = new HashMap<>();
+                    errors.put("msg", date);
+                    attributes.addFlashAttribute("errors", errors);
+                    return "redirect:http://auth.gulimall.com/reg.html";
+                }
+            } else {
+                Map<String, String> errors = new HashMap<>();
+                errors.put("code", "验证码错误！");
+                attributes.addFlashAttribute("errors", errors);
+                return "redirect:http://auth.gulimall.com/reg.html";
+            }
+        } else {
+            Map<String, String> errors = new HashMap<>();
+            errors.put("code", "验证码已过期请重新发送！");
+            attributes.addFlashAttribute("errors", errors);
+            return "redirect:http://auth.gulimall.com/reg.html";
+        }
+    }
+
+
+    /**
+     * 登录
+     *
+     * @param vo
+     * @return
+     */
+    @PostMapping("/login")
+    public String login(UserLoginVo vo, RedirectAttributes attributes) {
+
+        R r = memberFeignService.login(vo);
+        if (r.getCode() == 0) {
+            //成功
+            return "redirect:http://gulimall.com/";
+        }else {
+            //失败
+            String date = r.getDate("msg", new TypeReference<String>() {
+            });
+            Map<String, String> errors = new HashMap<>();
+            errors.put("msg", date);
+            attributes.addFlashAttribute("errors", errors);
+            return "redirect:http://auth.gulimall.com/login.html";
+        }
     }
 
 }

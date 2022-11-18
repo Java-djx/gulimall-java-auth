@@ -31,7 +31,6 @@ public class R extends HashMap<String, Object> {
         String toJSONString = JSON.toJSONString(data);
         //逆转回想要的类型
         T t = JSON.parseObject(toJSONString, tTypeReference);
-
         return t;
     }
 
@@ -41,10 +40,8 @@ public class R extends HashMap<String, Object> {
         String toJSONString = JSON.toJSONString(data);
         //逆转回想要的类型
         T t = JSON.parseObject(toJSONString, tTypeReference);
-
         return t;
     }
-
 
     public R setDate(Object data) {
         put("data", data);
@@ -94,7 +91,6 @@ public class R extends HashMap<String, Object> {
     }
 
     public Integer getCode() {
-
         return (Integer) this.get("code");
     }
 
