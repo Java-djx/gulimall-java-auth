@@ -16,13 +16,10 @@ public class GulimallSessionConfig {
 
     @Bean
     public CookieSerializer cookieSerializer() {
-
         DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
-
         //放大作用域
         cookieSerializer.setDomainName("gulimall.com");
         cookieSerializer.setCookieName("GULISESSION");
-
         return cookieSerializer;
     }
 

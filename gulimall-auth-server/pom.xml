@@ -8,7 +8,7 @@
         <version>2.1.8.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.xunqi.gulimall</groupId>
+    <groupId>com.atguigu.gulimall.auth</groupId>
     <artifactId>gulimall-auth-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>gulimall-auth-server</name>

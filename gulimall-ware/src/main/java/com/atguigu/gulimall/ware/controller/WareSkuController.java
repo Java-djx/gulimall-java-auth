@@ -43,7 +43,7 @@ public class WareSkuController {
 
         List<SkuHasStockVo> vos = wareSkuService.getSkusHasStock(skuIds);
 
-        return R.ok().setDate(vos);
+        return R.ok().setData(vos);
     }
 
 
