@@ -3,6 +3,7 @@ package com.atguigu.gulimall.auth.controller;
 import com.alibaba.fastjson.TypeReference;
 import com.atguigu.common.exception.BizCodeEnume;
 import com.atguigu.common.utils.R;
+import com.atguigu.common.vo.MemberResponseVo;
 import com.atguigu.gulimall.auth.constant.AuthServerConstant;
 import com.atguigu.gulimall.auth.feigin.MemberFeignService;
 import com.atguigu.gulimall.auth.feigin.ThirdPartFeignService;
@@ -18,12 +19,15 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.atguigu.common.constant.AuthServerConstant.LOGIN_USER;
 
 /**
  * @version 1.0
@@ -131,13 +135,21 @@ public class LoginController {
      * @return
      */
     @PostMapping("/login")
-    public String login(UserLoginVo vo, RedirectAttributes attributes) {
+    public String login(UserLoginVo vo, RedirectAttributes attributes, HttpSession session) {
 
         R r = memberFeignService.login(vo);
         if (r.getCode() == 0) {
+            MemberResponseVo data = r.getDate("data", new TypeReference<MemberResponseVo>() {
+            });
+            log.info("登录成功：用户信息：{}", data.toString());
+            session.setAttribute(LOGIN_USER, data);
+            //1、第一次使用session，命令浏览器保存卡号，JSESSIONID这个cookie
+            //以后浏览器访问哪个网站就会带上这个网站的cookie
+            //TODO 1、默认发的令牌。当前域（解决子域session共享问题）
+            //TODO 2、使用JSON的序列化方式来序列化对象到Redis中
             //成功
             return "redirect:http://gulimall.com/";
-        }else {
+        } else {
             //失败
             String date = r.getDate("msg", new TypeReference<String>() {
             });

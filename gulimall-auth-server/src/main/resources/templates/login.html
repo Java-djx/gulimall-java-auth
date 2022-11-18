@@ -32,7 +32,9 @@
         <div class="si_top">
             <p>
                 <span>谷粒商城不会以任何理由要求您转账汇款，谨防诈骗。</span>
+                <span style="color: red" th:if="session.msg!=null"><br/>[[${session.msg}]]</span>
             </p>
+
         </div>
         <div class="si_cen">
             <h2 class="act btn1">扫码登录</h2>
@@ -53,12 +55,12 @@
             </p>
         </div>
         <div class="si_bom1 tab" style="display: none;">
-                <div class="error">
-                    <div></div>
-                    请输入账户名和密码
-                </div>
+            <div class="error">
+                <div></div>
+                请输入账户名和密码
+            </div>
             <form action="/login" method="post">
-                <div style="color: red"  th:text="${errors != null ? (#maps.containsKey(errors, 'msg') ? errors.msg : '') : ''}"></div>
+                <div style="color: red" th:text="${errors != null ? (#maps.containsKey(errors, 'msg') ? errors.msg : '') : ''}"></div>
                 <ul>
                     <li class="top_1">
                         <img src="/static/login/JD_img/user_03.png" class="err_img1"/>
@@ -72,31 +74,31 @@
                         <a href="/static/login/">忘记密码</a>
                     </li>
                     <li class="ent">
-                        <button type="submit" class="btn2"><a>登 &nbsp; &nbsp;录</a></button>
+                        <button class="btn2" type="submit">登 &nbsp; &nbsp;录</a></button>
                     </li>
                 </ul>
-            </form>
         </div>
         <div class="si_out">
             <ul>
                 <li>
-                    <a href="/static/login/#">
-                        <img src="/static/login/JD_img/qq.png"/>
-                        <span>QQ</span>
+                    <a href="https://api.weibo.com/oauth2/authorize?client_id=3514646023&response_type=code&redirect_uri=http://auth.gulimall.com/oauth2.0/weibo/success">
+                        <img style="width: 50px;height: 18px;" src="/static/login/JD_img/weibo.png"/>
+
                     </a>
                 </li>
                 <li class="f4"> |</li>
                 <li>
-                    <a href="/static/login/">
+                    <a href="http://localhost:8150/api/ucenter/wx/login">
                         <img src="/static/login/JD_img/weixin.png"/>
                         <span>微信</span>
                     </a>
                 </li>
             </ul>
+            </form>
+
             <h5 class="rig">
                 <img src="/static/login/JD_img/4de5019d2404d347897dee637895d02b_25.png"/>
-                <span><a href="http://auth.gulimall.com/reg.html"
-                >立即注册</a></span>
+                <span><a href="http://auth.gulimall.com/reg.html">立即注册</a></span>
             </h5>
         </div>
     </div>

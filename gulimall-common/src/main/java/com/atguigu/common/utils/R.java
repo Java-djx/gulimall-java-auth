@@ -43,7 +43,7 @@ public class R extends HashMap<String, Object> {
         return t;
     }
 
-    public R setDate(Object data) {
+    public R setData(Object data) {
         put("data", data);
         return this;
     }
@@ -93,5 +93,6 @@ public class R extends HashMap<String, Object> {
     public Integer getCode() {
         return (Integer) this.get("code");
     }
+
 
 }

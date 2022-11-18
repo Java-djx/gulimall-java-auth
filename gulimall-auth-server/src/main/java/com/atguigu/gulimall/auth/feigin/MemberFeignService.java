@@ -1,9 +1,11 @@
 package com.atguigu.gulimall.auth.feigin;
 
 import com.atguigu.common.utils.R;
+import com.atguigu.gulimall.auth.vo.SocialUser;
 import com.atguigu.gulimall.auth.vo.UserLoginVo;
 import com.atguigu.gulimall.auth.vo.UserRegisterVo;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -34,4 +36,7 @@ public interface MemberFeignService {
      */
     @RequestMapping("/member/member/login")
     public R login(@RequestBody UserLoginVo vo);
+
+    @PostMapping(value = "/member/member/oauth2/login")
+    R oauthLogin(@RequestBody SocialUser socialUser) throws Exception;
 }

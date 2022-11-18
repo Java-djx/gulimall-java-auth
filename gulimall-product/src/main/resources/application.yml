@@ -27,6 +27,8 @@ spring:
   redis:
     port: 6379
     host: 192.168.184.129
+  session:
+    store-type: redis
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml
@@ -47,6 +49,7 @@ gulimall:
     core-pool-size: 20
     maximum-pool-size: 200
     keep-alive-time: 10
+
 
 
 
