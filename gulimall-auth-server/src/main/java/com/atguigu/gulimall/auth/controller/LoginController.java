@@ -48,9 +48,16 @@ public class LoginController {
     @Autowired
     private MemberFeignService memberFeignService;
 
-    @GetMapping({"/login.html", "/"})
-    public String loginPage() {
-        return "login";
+    @GetMapping(value = "/login.html")
+    public String loginPage(HttpSession session) {
+        //从session先取出来用户的信息，判断用户是否已经登录过了
+        Object attribute = session.getAttribute(LOGIN_USER);
+        //如果用户没登录那就跳转到登录页面
+        if (attribute == null) {
+            return "login";
+        } else {
+            return "redirect:http://gulimall.com";
+        }
     }
 
     /**
@@ -106,7 +113,7 @@ public class LoginController {
                     return "redirect:http://auth.gulimall.com/login.html";
                 } else {
                     //失败
-                    String date = r.getDate("msg", new TypeReference<String>() {
+                    String date = r.getData("msg", new TypeReference<String>() {
                     });
                     Map<String, String> errors = new HashMap<>();
                     errors.put("msg", date);
@@ -139,7 +146,7 @@ public class LoginController {
 
         R r = memberFeignService.login(vo);
         if (r.getCode() == 0) {
-            MemberResponseVo data = r.getDate("data", new TypeReference<MemberResponseVo>() {
+            MemberResponseVo data = r.getData("data", new TypeReference<MemberResponseVo>() {
             });
             log.info("登录成功：用户信息：{}", data.toString());
             session.setAttribute(LOGIN_USER, data);
@@ -151,7 +158,7 @@ public class LoginController {
             return "redirect:http://gulimall.com/";
         } else {
             //失败
-            String date = r.getDate("msg", new TypeReference<String>() {
+            String date = r.getData("msg", new TypeReference<String>() {
             });
             Map<String, String> errors = new HashMap<>();
             errors.put("msg", date);

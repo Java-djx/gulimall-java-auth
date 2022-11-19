@@ -89,7 +89,7 @@ public class MallSearchServiceImpl implements MallSearchService {
                 finalResult.getAttrIds().add(Long.parseLong(att[0]));
 
                 if (r.getCode() == 0) {
-                    AttrResponseVo date = r.getDate("attr", new TypeReference<AttrResponseVo>() {
+                    AttrResponseVo date = r.getData("attr", new TypeReference<AttrResponseVo>() {
                     });
                     navVo.setNavName(date.getAttrName());
                 } else {
@@ -107,7 +107,7 @@ public class MallSearchServiceImpl implements MallSearchService {
                 //TODO 远程查询所有品牌
                 R r = productFeignService.BrandsInfos(searchParam.getBrandId());
                 if (r.getCode() == 0) {
-                    List<BrandVo> date = r.getDate(new TypeReference<List<BrandVo>>() {
+                    List<BrandVo> date = r.getData(new TypeReference<List<BrandVo>>() {
                     });
                     StringBuffer stringBuffer = new StringBuffer();
                     String replace = "";

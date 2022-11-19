@@ -8,6 +8,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @version 1.0
@@ -39,4 +40,7 @@ public interface MemberFeignService {
 
     @PostMapping(value = "/member/member/oauth2/login")
     R oauthLogin(@RequestBody SocialUser socialUser) throws Exception;
+
+    @PostMapping(value = "/member/member/weixin/login")
+    R weixinLogin(@RequestParam("accessTokenInfo") String accessTokenInfo);
 }

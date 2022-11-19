@@ -58,7 +58,7 @@ public class OAuth2Controller {
             //调用远程服务
             R oauthLogin = memberFeignService.oauthLogin(socialUser);
             if (oauthLogin.getCode() == 0) {
-                MemberResponseVo data = oauthLogin.getDate("data", new TypeReference<MemberResponseVo>() {});
+                MemberResponseVo data = oauthLogin.getData("data", new TypeReference<MemberResponseVo>() {});
                 log.info("登录成功：用户信息：{}",data.toString());
 
                 //1、第一次使用session，命令浏览器保存卡号，JSESSIONID这个cookie
