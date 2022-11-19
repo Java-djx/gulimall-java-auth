@@ -35,7 +35,6 @@ public class MyCacheConfig {
      */
     @Bean
     public RedisCacheConfiguration redisCacheConfiguration(CacheProperties cacheProperties) {
-
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
         //修改缓存的值和建 序列化方式
         config = config.serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()));

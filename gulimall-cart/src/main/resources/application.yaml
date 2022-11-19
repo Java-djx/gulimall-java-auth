@@ -6,5 +6,13 @@ spring:
     host: 192.168.184.129
   session:
     store-type: redis
+  thymeleaf:
+    cache: false
 server:
   port: 40000
+
+gulimall:
+  thread:
+    core-pool-size: 20
+    maximum-pool-size: 200
+    keep-alive-time: 10
