@@ -33,6 +33,14 @@ spring:
     listener:
       simple:
         acknowledge-mode: manual
+  thymeleaf:
+    cache: false
+  redis:
+    host: 192.168.184.129
+    port: 6379
+  session:
+    store-type: redis
+
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml

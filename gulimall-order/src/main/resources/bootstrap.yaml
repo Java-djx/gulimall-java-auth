@@ -1,0 +1,8 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848 #配置nacos
+      config:
+        namespace: 4f32d504-62c8-4610-a379-a5da09c5a85b
+        server-addr: 127.0.0.1:8848 #配置nacos
