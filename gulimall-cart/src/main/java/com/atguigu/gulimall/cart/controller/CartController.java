@@ -3,6 +3,7 @@ package com.atguigu.gulimall.cart.controller;
 import com.atguigu.common.constant.AuthServerConstant;
 import com.atguigu.gulimall.cart.interceptor.CartInterceptor;
 import com.atguigu.gulimall.cart.service.CartService;
+import com.atguigu.gulimall.cart.vo.Cart;
 import com.atguigu.gulimall.cart.vo.CartItem;
 import com.atguigu.gulimall.cart.vo.UserInfoTo;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import java.util.concurrent.ExecutionException;
@@ -40,12 +43,12 @@ public class CartController {
      * @return
      */
     @GetMapping("/cartList.html")
-    public String cartListPage(HttpSession session) {
+    public String cartListPage(HttpSession session, Model model) {
 
-        //1.目标方法快速得到数据
-        UserInfoTo userInfoTo = CartInterceptor.toThreadLocal.get();
 
-        log.info("获取到线程中内存用户{}", userInfoTo);
+        Cart cart = cartService.getCart();
+
+        model.addAttribute("cart", cart);
 
         return "cartList";
     }
@@ -58,19 +61,17 @@ public class CartController {
      * @date 2022/11/19 21:49
      */
     @GetMapping("/addToCart")
-    public String addToCart(@RequestParam("skuId") Long skuId, @RequestParam("num") Integer num, Model model) {
+    public String addToCart(@RequestParam("skuId") Long skuId, @RequestParam("num") Integer num, RedirectAttributes ra) throws ExecutionException, InterruptedException {
+        CartItem cartItem = cartService.addToCart(skuId, num);
+        ra.addAttribute("skuId", skuId);
+        return "redirect:http://cart.gulimall.com/addToCartSuccess.html";
+    }
 
-        CartItem cartItem = null;
-        try {
-            cartItem = cartService.addToCart(skuId, num);
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+    @GetMapping("/addToCartSuccess.html")
+    public String addToCartSuccess(@RequestParam("skuId") Long skuId, Model model) {
+        //  重定向到成功页面再次查询购物车数据就可以
+        CartItem cartItem = cartService.getCartItem(skuId);
         model.addAttribute("item", cartItem);
-
         return "success";
     }
 
