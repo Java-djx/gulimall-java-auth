@@ -32,6 +32,50 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
+     /*
+      * 删除购物项
+      * @return
+      * @author djx
+      * @deprecated: Talk is cheap,show me the code
+      * @date 2022/11/21 15:06
+      */
+    @GetMapping("/deleteItem")
+    public String deleteItem(@RequestParam("skuId") Long skuId){
+        cartService.deleteItem(skuId);
+
+
+        return "redirect:http://cart.gulimall.com/cartList.html";
+    }
+
+
+    /*
+     * 改变数量
+     * @return
+     * @author djx
+     * @deprecated: Talk is cheap,show me the code
+     * @date 2022/11/21 14:45
+     */
+    @GetMapping("/countItem.html")
+    public String countItem(@RequestParam("skuId") Long skuId, @RequestParam("num") Integer num) {
+        cartService.changeItemCount(skuId,num);
+
+
+        return "redirect:http://cart.gulimall.com/cartList.html";
+    }
+
+    /*
+     * 改变勾选状态
+     * @return
+     * @author djx
+     * @deprecated: Talk is cheap,show me the code
+     * @date 2022/11/21 14:45
+     */
+    @GetMapping("/checkItem.html")
+    public String checkItem(@RequestParam("skuId") Long skuId, @RequestParam("check") Integer check) {
+        cartService.checkItem(skuId, check);
+        return "redirect:http://cart.gulimall.com/cartList.html";
+    }
+
     /**
      * 跳转到购物车页面
      * 1、 游览器有一个user-key 标识用户的身份一个月过期
@@ -43,13 +87,9 @@ public class CartController {
      * @return
      */
     @GetMapping("/cartList.html")
-    public String cartListPage(HttpSession session, Model model) {
-
-
+    public String cartListPage(HttpSession session, Model model) throws ExecutionException, InterruptedException {
         Cart cart = cartService.getCart();
-
         model.addAttribute("cart", cart);
-
         return "cartList";
     }
 

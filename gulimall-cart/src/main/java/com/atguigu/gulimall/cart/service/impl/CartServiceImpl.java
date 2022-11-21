@@ -131,6 +131,8 @@ public class CartServiceImpl implements CartService {
                 for (CartItem item : cartItemsTemps) {
                     addToCart(item.getSkuId(), item.getCount());
                 }
+                //清除临时购物车
+                clearCart(cartTemps);
             }
             //获取登录后的购物车 [包含合并的临时购物车]
             List<CartItem> cartItems = getCartItems(cartKey);
@@ -144,6 +146,37 @@ public class CartServiceImpl implements CartService {
         }
         log.info("获取到线程中内存用户{}", userInfoTo);
         return cart;
+    }
+
+    @Override
+    public void clearCart(String cartKey) {
+        redisTemplate.delete(cartKey);
+    }
+
+    @Override
+    public void checkItem(Long skuId, Integer check) {
+        BoundHashOperations<String, Object, Object> cartOps = getCartOps();
+        CartItem cartItem = getCartItem(skuId);
+        cartItem.setCheck(check == 1 ? true : false);
+        String toJSONString = JSON.toJSONString(cartItem);
+        cartOps.put(skuId.toString(), toJSONString);
+
+    }
+
+    @Override
+    public void changeItemCount(Long skuId, Integer num) {
+        BoundHashOperations<String, Object, Object> cartOps = getCartOps();
+        CartItem cartItem = getCartItem(skuId);
+        cartItem.setCount(num);
+        String toJSONString = JSON.toJSONString(cartItem);
+        cartOps.put(skuId.toString(), toJSONString);
+    }
+
+    @Override
+    public void deleteItem(Long skuId) {
+        BoundHashOperations<String, Object, Object> cartOps = getCartOps();
+
+        cartOps.delete(skuId.toString());
     }
 
     /*
@@ -191,5 +224,6 @@ public class CartServiceImpl implements CartService {
         BoundHashOperations<String, Object, Object> operations = redisTemplate.boundHashOps(cartKey);
         return operations;
     }
+
 
 }

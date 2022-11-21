@@ -15,6 +15,24 @@ spring:
         server-addr: 127.0.0.1:8848 #配置nacos
   application:
     name: gulimall-order #服务名称
+  #RabbitMq
+  rabbitmq:
+    password: guest
+    username: guest
+    host: 192.168.184.129
+    virtual-host: /
+    port: 5672
+    #开启发送端确定
+    publisher-confirms: true
+    #开启发送端正确发送到队列
+    publisher-returns: true
+    #只要抵达队列，异步发送优先回调 publisher-returns
+    template:
+      mandatory: true
+    #开启手动模式
+    listener:
+      simple:
+        acknowledge-mode: manual
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml
@@ -23,4 +41,5 @@ mybatis-plus:
       id-type: auto
 server:
   port: 9000
+
 

@@ -32,13 +32,51 @@ public interface CartService {
      */
     CartItem getCartItem(Long skuId);
 
+    /*
+     * 获取整个购物车
+     * @return
+     * @author djx
+     * @deprecated: Talk is cheap,show me the code
+     * @date 2022/11/19 23:48
+     */
+    Cart getCart() throws ExecutionException, InterruptedException;
+
+
+    /*
+     清空购物车数据
+     * @return
+     * @author djx
+     * @deprecated: Talk is cheap,show me the code
+     * @date 2022/11/21 13:46
+     */
+    public void clearCart(String cartKey);
+
      /*
-      * 获取整个购物车
+      * 勾选购物项
       * @return
       * @author djx
       * @deprecated: Talk is cheap,show me the code
-      * @date 2022/11/19 23:48
+      * @date 2022/11/21 14:36
       */
-    Cart getCart() throws ExecutionException, InterruptedException;
+    void checkItem(Long skuId, Integer check);
+
+     /*
+      * 修改购物项数量
+      * @return
+      * @author djx
+      * @deprecated: Talk is cheap,show me the code
+      * @date 2022/11/21 14:46
+      */
+    void changeItemCount(Long skuId, Integer num);
+
+     /*
+      * 删除购物项
+      * @return
+      * @author djx
+      * @deprecated: Talk is cheap,show me the code
+      * @date 2022/11/21 15:06
+      */
+    void deleteItem(Long skuId);
 
 }
+
