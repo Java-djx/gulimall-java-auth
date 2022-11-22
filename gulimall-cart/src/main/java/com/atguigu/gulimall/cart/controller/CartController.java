@@ -7,6 +7,7 @@ import com.atguigu.gulimall.cart.vo.Cart;
 import com.atguigu.gulimall.cart.vo.CartItem;
 import com.atguigu.gulimall.cart.vo.UserInfoTo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.LifecycleState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -32,15 +34,27 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-     /*
-      * 删除购物项
-      * @return
-      * @author djx
-      * @deprecated: Talk is cheap,show me the code
-      * @date 2022/11/21 15:06
-      */
+    /*
+     * 提供给订单服务获取购物项
+     * @return
+     * @author djx
+     * @deprecated: Talk is cheap,show me the code
+     * @date 2022/11/21 20:59
+     */
+    @GetMapping("/currentUserCartItems")
+    public List<CartItem> getCurrentUserCartItems() {
+        return cartService.getCurrentUserCartItems();
+    }
+
+    /*
+     * 删除购物项
+     * @return
+     * @author djx
+     * @deprecated: Talk is cheap,show me the code
+     * @date 2022/11/21 15:06
+     */
     @GetMapping("/deleteItem")
-    public String deleteItem(@RequestParam("skuId") Long skuId){
+    public String deleteItem(@RequestParam("skuId") Long skuId) {
         cartService.deleteItem(skuId);
 
 
@@ -57,7 +71,7 @@ public class CartController {
      */
     @GetMapping("/countItem.html")
     public String countItem(@RequestParam("skuId") Long skuId, @RequestParam("num") Integer num) {
-        cartService.changeItemCount(skuId,num);
+        cartService.changeItemCount(skuId, num);
 
 
         return "redirect:http://cart.gulimall.com/cartList.html";
