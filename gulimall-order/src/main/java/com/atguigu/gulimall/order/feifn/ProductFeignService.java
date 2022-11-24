@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @FeignClient("gulimall-product")
 public interface ProductFeignService {
 
-    @RequestMapping("/skuId/{skuId}")
+    @RequestMapping("/product/spuinfo/skuId/{skuId}")
     public R getSpuInfoBySkuId(@PathVariable("skuId") Long skuId);
 
 }

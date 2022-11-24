@@ -49,13 +49,14 @@ public class OrderWebController {
       * @date 2022/11/24 12:06
       */
     @PostMapping("/submitOrder")
-    public String submitOrder(OrderSubmitVo vo){
+    public String submitOrder(OrderSubmitVo vo,Model model){
         //下单 创建订单，验证令牌，验价格
         SubmitOrderResponseVo responseVo= orderService.submitOrder(vo);
         log.info("订单提交的数据:{}",vo);
         //下单成功来到订单支付页面
         //下单失败重新返回订单页
         if (responseVo.getCode()==0){
+            model.addAttribute("submitOrderResp",responseVo);
             return "pay";
         }else{
             return "redirect:http://order.gulimall.com/toTrade";

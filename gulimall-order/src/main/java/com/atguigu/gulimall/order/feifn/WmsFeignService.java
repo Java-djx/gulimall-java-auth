@@ -1,10 +1,9 @@
 package com.atguigu.gulimall.order.feifn;
 
 import com.atguigu.common.utils.R;
+import com.atguigu.gulimall.order.vo.WareSkuLockVo;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,5 +35,17 @@ public interface WmsFeignService {
      */
     @GetMapping("/ware/wareinfo/fare")
     public R getFare(@RequestParam("addrId") Long addrId);
+
+
+    /*
+     * 锁定库存
+     * @return
+     * @author djx
+     * @deprecated: Talk is cheap,show me the code
+     * @date 2022/11/24 19:22
+     */
+    @PostMapping("/ware/waresku/lock/order")
+    public R orderLockStock(@RequestBody WareSkuLockVo vo);
+
 
 }
