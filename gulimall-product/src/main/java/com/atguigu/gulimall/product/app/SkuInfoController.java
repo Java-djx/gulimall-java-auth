@@ -34,10 +34,14 @@ public class SkuInfoController {
      * @deprecated: Talk is cheap,show me the code
      * @date 2022/11/21 21:08
      */
-    @GetMapping("/{skuId}/price")
-    public BigDecimal getPrice(@PathVariable("skuId") Long skuId) {
+    @GetMapping(value = "/{skuId}/price")
+    public R getPrice(@PathVariable("skuId") Long skuId) {
+        //获取当前商品的信息
+        SkuInfoEntity skuInfo = skuInfoService.getById(skuId);
+        //获取商品的价格
+        BigDecimal price = skuInfo.getPrice();
 
-        return skuInfoService.getById(skuId).getPrice();
+        return R.ok().setData(price);
     }
 
 

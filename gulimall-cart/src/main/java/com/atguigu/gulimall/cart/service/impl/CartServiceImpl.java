@@ -19,6 +19,8 @@ import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -179,29 +181,42 @@ public class CartServiceImpl implements CartService {
         cartOps.delete(skuId.toString());
     }
 
+    /*
+     * 获取当前登录用户的购物车
+     * @return
+     * @author djx
+     * @deprecated: Talk is cheap,show me the code
+     * @date 2022/11/22 18:26
+     */
     @Override
     public List<CartItem> getCurrentUserCartItems() {
+        List<CartItem> cartItemVoList = new ArrayList<CartItem>();
         UserInfoTo userInfoTo = CartInterceptor.toThreadLocal.get();
-        if (userInfoTo.getUserId() != null) {
-            //登录状态
+        if (userInfoTo.getUserId() == null) {
+            return null;
+        } else {
+            //获取购物车项
             String cartKey = CartConstant.CART_PREFIX + userInfoTo.getUserId();
+            //获取所有的
             List<CartItem> cartItems = getCartItems(cartKey);
-            //所有选择的购物车
-            List<CartItem> collect = cartItems.stream()
-                    .map(cartItem -> {
-                        CartItem item = new CartItem();
-                        //查询当前商品服务
-                        //更新为最新的价格
-                        item.setPrice(productFeignService.getPrice(cartItem.getSkuId()));
+            if (cartItems == null) {
+                throw new RuntimeException();
+            }
+            //筛选出选中的
+            cartItemVoList = cartItems.stream()
+                    .filter(items -> items.getCheck())
+                    .map(item -> {
+                        //更新为最新的价格（查询数据库）
+                        R r = productFeignService.getPrice(item.getSkuId());
+                        BigDecimal data = r.getData(new TypeReference<BigDecimal>() {
+                        });
+                        item.setPrice(data);
                         return item;
                     })
-                    .filter((item) -> {
-                        return item.getCheck();
-                    }).collect(Collectors.toList());
-            return collect;
-        } else {
-            return null;
+                    .collect(Collectors.toList());
         }
+
+        return cartItemVoList;
 
     }
 

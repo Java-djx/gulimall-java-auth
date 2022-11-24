@@ -1,6 +1,7 @@
 package com.atguigu.gulimall.cart.controller;
 
 import com.atguigu.common.constant.AuthServerConstant;
+import com.atguigu.common.utils.R;
 import com.atguigu.gulimall.cart.interceptor.CartInterceptor;
 import com.atguigu.gulimall.cart.service.CartService;
 import com.atguigu.gulimall.cart.vo.Cart;
@@ -15,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
@@ -42,8 +44,10 @@ public class CartController {
      * @date 2022/11/21 20:59
      */
     @GetMapping("/currentUserCartItems")
-    public List<CartItem> getCurrentUserCartItems() {
-        return cartService.getCurrentUserCartItems();
+    @ResponseBody
+    public R getCurrentUserCartItems() {
+        List<CartItem> items = cartService.getCurrentUserCartItems();
+        return R.ok().setData(items);
     }
 
     /*

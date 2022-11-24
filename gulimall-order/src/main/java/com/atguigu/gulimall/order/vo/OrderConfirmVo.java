@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @version 1.0
@@ -21,7 +22,7 @@ public class OrderConfirmVo {
      **/
     @Getter
     @Setter
-    List<MemberAddressVo> memberAddressVos;
+    List<MemberAddressVo> address;
 
 
     /**
@@ -42,6 +43,10 @@ public class OrderConfirmVo {
     @Setter
     private Integer integration;
 
+    @Getter
+    @Setter
+    private Map<Long, Boolean> stocks;
+
     /**
      * 订单防重令牌
      */
@@ -49,23 +54,35 @@ public class OrderConfirmVo {
     @Setter
     private String orderToken;
 
-    /**
-     * 订单总价
-     */
-    public BigDecimal getTotal() {
-        BigDecimal bigDecimal = new BigDecimal("0");
-        if (items != null) {
+
+
+
+    public Integer getCount() {
+        Integer count = 0;
+        if (items != null && items.size() > 0) {
             for (OrderItemVo item : items) {
-                //计算总价格当前数量乘以购物车每一项的价格
-                BigDecimal price = item.getPrice();
-                //获取总数
-                Integer count = item.getCount();
-                //相乘
-                BigDecimal multiply = price.multiply(new BigDecimal(count));
-                bigDecimal = bigDecimal.add(multiply);
+                count += item.getCount();
             }
         }
-        return bigDecimal;
+        return count;
+    }
+
+    /**
+     * 订单总额
+     **/
+    //BigDecimal total;
+    //计算订单总额
+    public BigDecimal getTotal() {
+        BigDecimal totalNum = BigDecimal.ZERO;
+        if (items != null && items.size() > 0) {
+            for (OrderItemVo item : items) {
+                //计算当前商品的总价格
+                BigDecimal itemPrice = item.getPrice().multiply(new BigDecimal(item.getCount().toString()));
+                //再计算全部商品的总价格
+                totalNum = totalNum.add(itemPrice);
+            }
+        }
+        return totalNum;
     }
 
     /**

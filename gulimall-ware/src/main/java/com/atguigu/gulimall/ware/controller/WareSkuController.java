@@ -37,6 +37,7 @@ public class WareSkuController {
     private ProductFeignService productFeignService;
 
 
+
     //查询sku是否有存库
     @RequestMapping("/hasStock")
     public R hasStock(@RequestParam List<Long> skuIds) {
