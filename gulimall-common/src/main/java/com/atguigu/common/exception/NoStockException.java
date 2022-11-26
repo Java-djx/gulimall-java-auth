@@ -1,4 +1,4 @@
-package com.atguigu.gulimall.ware.exception;
+package com.atguigu.common.exception;
 
 /**
  * @version 1.0
@@ -12,6 +12,11 @@ public class NoStockException extends RuntimeException {
     public NoStockException(Long skuId) {
         super("商品id为:" + skuId + "没有足够的库存了");
     }
+
+    public NoStockException() {
+        super("没有足够的库存");
+    }
+
 
     public Long getSkuId() {
         return skuId;

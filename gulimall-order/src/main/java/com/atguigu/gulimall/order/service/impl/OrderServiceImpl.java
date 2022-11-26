@@ -1,6 +1,7 @@
 package com.atguigu.gulimall.order.service.impl;
 
 import com.alibaba.fastjson.TypeReference;
+import com.atguigu.common.exception.NoStockException;
 import com.atguigu.common.utils.R;
 import com.atguigu.common.vo.MemberResponseVo;
 import com.atguigu.gulimall.order.constant.OrderConstant;
@@ -189,6 +190,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                     return response;
                 } else {
                     //锁定失败
+                    throw new NoStockException();
                     response.setCode(3);
                     return response;
                 }
@@ -233,6 +235,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         List<OrderItemEntity> itemsEntity = buildOrderItems(orderSn);
         //3.计算价格相关
         computePrice(orderEntity, itemsEntity);
+        //爆粗订单
+        createTo.setOrder(orderEntity);
+        createTo.setOrderItems(itemsEntity);
 
         return createTo;
     }
