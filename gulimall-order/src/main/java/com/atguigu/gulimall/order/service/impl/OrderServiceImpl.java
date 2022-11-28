@@ -167,7 +167,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             BigDecimal payAmount = order.getOrder().getPayAmount();
             BigDecimal payPrice = vo.getPayPrice();
             if (Math.abs(payAmount.subtract(payPrice).doubleValue()) < 0.01) { //金额对比成功
-
                 //3.保存订单
                 saveOrder(order);
                 //4.库存锁定只要有异常回滚订单数据
@@ -189,8 +188,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                     response.setOrder(order.getOrder());
                     return response;
                 } else {
-                    //锁定失败
-                    throw new NoStockException();
+
+                    String msg= (String)r.get("msg");
                     response.setCode(3);
                     return response;
                 }
@@ -215,7 +214,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         this.save(entity);
         List<OrderItemEntity> items = order.getOrderItems();
         orderItemService.saveBatch(items);
-
     }
 
     /*
@@ -235,7 +233,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         List<OrderItemEntity> itemsEntity = buildOrderItems(orderSn);
         //3.计算价格相关
         computePrice(orderEntity, itemsEntity);
-        //爆粗订单
+        //保存订单
         createTo.setOrder(orderEntity);
         createTo.setOrderItems(itemsEntity);
 
