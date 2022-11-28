@@ -27,7 +27,6 @@ public class MyRabbitConfig {
         return new Jackson2JsonMessageConverter();
     }
 
-
     /*
      * 定制化MQ模板
      * @return

@@ -41,7 +41,6 @@ spring:
   session:
     store-type: redis
 
-
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml
   global-config:

@@ -38,5 +38,23 @@ public interface OrderService extends IService<OrderEntity> {
       * @date 2022/11/24 13:58
       */
     SubmitOrderResponseVo submitOrder(OrderSubmitVo vo);
+
+     /*
+      * 根据订单编号查询订单状态
+      * @return
+      * @author djx
+      * @deprecated: Talk is cheap,show me the code
+      * @date 2022/11/28 18:57
+      */
+    OrderEntity getOrderStatusBySn(String orderSn);
+
+     /*
+      * 订单超时未支付关闭订单
+      * @return
+      * @author djx
+      * @deprecated: Talk is cheap,show me the code
+      * @date 2022/11/28 18:57
+      */
+    void closeOrder(OrderEntity entity);
 }
 

@@ -15,6 +15,15 @@ spring:
         server-addr: 127.0.0.1:8848 #配置nacos
   application:
     name: gulimall-ware #服务名称
+  rabbitmq:
+    password: guest
+    username: guest
+    host: 192.168.184.129
+    virtual-host: /
+    port: 5672
+    listener:
+      simple:
+        acknowledge-mode: manual
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml
@@ -27,3 +36,4 @@ server:
 logging:
   level:
     com.atguigu: debug
+

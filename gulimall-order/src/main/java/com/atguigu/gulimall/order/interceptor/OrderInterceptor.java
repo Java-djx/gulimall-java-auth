@@ -39,6 +39,11 @@ public class OrderInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
+        boolean match = new AntPathMatcher().match("/order/order/status/**", request.getRequestURI());
+        if (match) {
+            return true;
+        }
+
         //获取登录的用户信息
         MemberResponseVo attribute = (MemberResponseVo) request.getSession().getAttribute(AuthServerConstant.LOGIN_USER);
         if (attribute != null) {

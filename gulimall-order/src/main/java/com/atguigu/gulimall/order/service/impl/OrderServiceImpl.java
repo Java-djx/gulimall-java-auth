@@ -17,6 +17,8 @@ import com.atguigu.gulimall.order.to.OrderCreateTo;
 import com.atguigu.gulimall.order.vo.*;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import io.seata.spring.annotation.GlobalTransactional;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -73,6 +75,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     private OrderItemService orderItemService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
 
     @Override
@@ -186,18 +191,36 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 if (r.getCode() == 0) {
                     //锁定库存成功
                     response.setOrder(order.getOrder());
+//                    int i = 10 / 0;
+                    //TODO 订单创建成功发送消息
+                    rabbitTemplate.convertAndSend("order-event-exchange","order.create.order",order);
                     return response;
                 } else {
-
-                    String msg= (String)r.get("msg");
-                    response.setCode(3);
-                    return response;
+                    String msg = (String) r.get("msg");
+                    throw new NoStockException(msg);
                 }
             } else {
                 response.setCode(2);//金额对比失败
                 return response;
             }
         }
+    }
+
+    @Override
+    public OrderEntity getOrderStatusBySn(String orderSn) {
+        return this.baseMapper.selectOne(new QueryWrapper<OrderEntity>().eq("order_sn", orderSn));
+    }
+
+     /*
+      * 关闭订单
+      * @return
+      * @author djx
+      * @deprecated: Talk is cheap,show me the code
+      * @date 2022/11/28 18:57
+      */
+    @Override
+    public void closeOrder(OrderEntity entity) {
+
     }
 
     /*
