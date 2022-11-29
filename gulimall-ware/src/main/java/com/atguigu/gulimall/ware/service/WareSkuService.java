@@ -1,5 +1,6 @@
 package com.atguigu.gulimall.ware.service;
 
+import com.atguigu.common.to.mq.OrderTo;
 import com.atguigu.common.to.mq.StockLockedTo;
 import com.atguigu.gulimall.ware.vo.LockStockResult;
 import com.atguigu.gulimall.ware.vo.SkuHasStockVo;
@@ -41,6 +42,23 @@ public interface WareSkuService extends IService<WareSkuEntity> {
      */
     Boolean orderLockStock(WareSkuLockVo vo);
 
+     /*
+      * 解锁库存
+      * @return
+      * @author djx
+      * @deprecated: Talk is cheap,show me the code
+      * @date 2022/11/28 20:00
+      */
     void unlockStock(StockLockedTo to);
+
+     /*
+      * 解锁订单
+      *  防止订单服务卡顿
+      * @return
+      * @author djx
+      * @deprecated: Talk is cheap,show me the code
+      * @date 2022/11/28 20:21
+      */
+    void orderLockStock(OrderTo orderTo);
 }
 

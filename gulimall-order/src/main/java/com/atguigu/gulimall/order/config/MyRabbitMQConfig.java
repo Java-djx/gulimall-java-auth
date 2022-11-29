@@ -20,7 +20,6 @@ public class MyRabbitMQConfig {
     /* 容器中的Queue、Exchange、Binding 会自动创建（在RabbitMQ）不存在的情况下 */
 
 
-
     /**
      * 死信队列
      *
@@ -93,6 +92,20 @@ public class MyRabbitMQConfig {
                 Binding.DestinationType.QUEUE,
                 "order-event-exchange",
                 "order.release.order",
+                null);
+    }
+
+    /**
+     * 订单和库存绑定关系
+     *
+     * @return
+     */
+    @Bean
+    public Binding OrderReleaseOtherBinding() {
+        return new Binding("stock.release.stock.queue",
+                Binding.DestinationType.QUEUE,
+                "order-event-exchange",
+                "order.release.other.#",
                 null);
     }
 

@@ -2,6 +2,7 @@ package com.atguigu.gulimall.ware.service.impl;
 
 import com.alibaba.fastjson.TypeReference;
 import com.atguigu.common.exception.NoStockException;
+import com.atguigu.common.to.mq.OrderTo;
 import com.atguigu.common.to.mq.StockDetailTo;
 import com.atguigu.common.to.mq.StockLockedTo;
 import com.atguigu.common.utils.R;
@@ -144,7 +145,6 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             vo.setHasStock(count == null ? false : count > 0);
             return vo;
         }).collect(Collectors.toList());
-
         return skuHasStockVos;
     }
 
@@ -182,6 +182,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             stock.setWareId(wareId);
             return stock;
         }).collect(Collectors.toList());
+
         for (SkuWareHasStock hasStock : wareHasStocks) {
             Boolean skuStock = false;
             Long skuId = hasStock.getSkuId();
@@ -199,7 +200,9 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                     //锁定成功
                     skuStock = true;
                     //TODO 注入MQ发送消息库存锁定成功
-                    WareOrderTaskDetailEntity orderTaskDetailEntity = new WareOrderTaskDetailEntity(null, skuId, "", hasStock.getNum(), orderTaskEntity.getId(), wareId, 1);
+                    R info = productFeignService.info(skuId);
+                    Map<String, Object> data = (Map<String, Object>) info.get("skuInfo");
+                    WareOrderTaskDetailEntity orderTaskDetailEntity = new WareOrderTaskDetailEntity(null, skuId, (String) data.get("skuName"), hasStock.getNum(), orderTaskEntity.getId(), wareId, 1);
                     orderTaskDetailService.save(orderTaskDetailEntity);
                     //构造mq库存锁定成功的工作单
                     StockLockedTo lockedTo = new StockLockedTo();
@@ -267,6 +270,33 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             }
         } else {
             //无需解锁
+        }
+    }
+
+    /*
+     * 防止订单卡顿，导致订单状态消息一直不能修改，库存消息优先到齐，查订单状态无法正确解锁库存
+     * @return
+     * @author djx
+     * @deprecated: Talk is cheap,show me the code
+     * @date 2022/11/28 20:22
+     */
+    @Transactional
+    @Override
+    public void orderLockStock(OrderTo orderTo) {
+        String orderSn = orderTo.getOrderSn();
+        //查询订单最新状态
+        R r = orderFeignService.getOrderStatusBySn(orderSn);
+        WareOrderTaskEntity task = orderTaskService.getOrderTaskByOrderSn(orderSn);
+        //工作单id
+        Long taskId = task.getId();
+        //按照库存工作单查找所有没有解锁的库存进行解锁
+        List<WareOrderTaskDetailEntity> detailByTaskId =
+                orderTaskDetailService.getOrderTaskDetailByTaskId(taskId);
+        //解锁
+        for (WareOrderTaskDetailEntity detailEntity : detailByTaskId) {
+//            Long skuId, Long wareId, Integer num, Long taskDetailId
+            //解锁库存
+            unLockStock(detailEntity.getSkuId(), detailEntity.getWareId(), detailEntity.getSkuNum(), detailEntity.getId());
         }
     }
 

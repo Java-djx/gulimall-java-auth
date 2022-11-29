@@ -2,6 +2,7 @@ package com.atguigu.gulimall.order.service.impl;
 
 import com.alibaba.fastjson.TypeReference;
 import com.atguigu.common.exception.NoStockException;
+import com.atguigu.common.to.mq.OrderTo;
 import com.atguigu.common.utils.R;
 import com.atguigu.common.vo.MemberResponseVo;
 import com.atguigu.gulimall.order.constant.OrderConstant;
@@ -18,7 +19,9 @@ import com.atguigu.gulimall.order.vo.*;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import io.seata.spring.annotation.GlobalTransactional;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -193,7 +196,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                     response.setOrder(order.getOrder());
 //                    int i = 10 / 0;
                     //TODO 订单创建成功发送消息
-                    rabbitTemplate.convertAndSend("order-event-exchange","order.create.order",order);
+                    rabbitTemplate.convertAndSend("order-event-exchange", "order.create.order", order.getOrder());
                     return response;
                 } else {
                     String msg = (String) r.get("msg");
@@ -211,15 +214,35 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         return this.baseMapper.selectOne(new QueryWrapper<OrderEntity>().eq("order_sn", orderSn));
     }
 
-     /*
-      * 关闭订单
-      * @return
-      * @author djx
-      * @deprecated: Talk is cheap,show me the code
-      * @date 2022/11/28 18:57
-      */
+    /*
+     * 关闭订单
+     * @return
+     * @author djx
+     * @deprecated: Talk is cheap,show me the code
+     * @date 2022/11/28 18:57
+     */
     @Override
     public void closeOrder(OrderEntity entity) {
+        //查询当前订单的最新状态
+        OrderEntity orderEntity = this.getById(entity.getId());
+        if (orderEntity.getStatus() == OrderStatusEnum.CREATE_NEW.getCode()) {
+            //取消订单
+            OrderEntity update = new OrderEntity();
+            update.setStatus(OrderStatusEnum.CANCLED.getCode());
+            update.setId(orderEntity.getId());
+            this.updateById(update);
+            //订单取消成功 发送消息库存解锁
+            OrderTo orderTo = new OrderTo();
+            BeanUtils.copyProperties(orderEntity, orderTo);
+            try {
+                //TODO 消息百分百投递 给每一个消息保存做好日志记录
+                //TODO 定期扫描数据库
+                rabbitTemplate.convertAndSend("order-event-exchange", "order.release.other", orderTo);
+            } catch (Exception e) {
+                //TODO 将没发送的消息重试发送
+            }
+        }
+
 
     }
 
@@ -405,7 +428,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         //5.积分消息
         orderItemEntity.setGiftGrowth(cartItem.getPrice().multiply(new BigDecimal(cartItem.getCount().toString())).intValue());
         orderItemEntity.setGiftIntegration(cartItem.getPrice().multiply(new BigDecimal(cartItem.getCount().toString())).intValue());
-
         //6.订单项的价格消息
         orderItemEntity.setPromotionAmount(new BigDecimal("0"));
         orderItemEntity.setCouponAmount(new BigDecimal("0"));
