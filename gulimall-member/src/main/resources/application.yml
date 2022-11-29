@@ -14,7 +14,15 @@ spring:
       discovery:
         server-addr: 127.0.0.1:8848 #配置nacos
   application:
-      name: gulimall-member #服务名称
+    name: gulimall-member #服务名称
+  thymeleaf:
+    cache: false
+  redis:
+    host: 192.168.184.129
+    port: 6379
+  session:
+    store-type: redis
+
 
 mybatis-plus:
   mapperLocations: classpath:mapper/**/*.xml

@@ -247,6 +247,26 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     }
 
     /*
+     * 获取当前订单的支付消息
+     * @return
+     * @author djx
+     * @deprecated: Talk is cheap,show me the code
+     * @date 2022/11/29 14:03
+     */
+    @Override
+    public PayVo getOrderPay(String orderSn) {
+        OrderEntity orderEntity = this.getOrderStatusBySn(orderSn);
+        PayVo payVo = new PayVo();
+        OrderItemEntity orderItemEntity = orderItemService.list(new QueryWrapper<OrderItemEntity>().eq("order_sn", orderSn)).get(0);
+        BigDecimal bigDecimal = orderEntity.getPayAmount().setScale(2, BigDecimal.ROUND_UP);
+        payVo.setTotal_amount(bigDecimal.toString());
+        payVo.setOut_trade_no(orderEntity.getOrderSn());
+        payVo.setSubject("谷粒商城" + orderItemEntity.getSkuName());
+        payVo.setBody(orderItemEntity.getSkuAttrsVals());
+        return payVo;
+    }
+
+    /*
      * 保存订单
      * @return
      * @author djx
