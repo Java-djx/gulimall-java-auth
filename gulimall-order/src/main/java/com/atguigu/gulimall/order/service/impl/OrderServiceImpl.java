@@ -6,7 +6,9 @@ import com.atguigu.common.to.mq.OrderTo;
 import com.atguigu.common.utils.R;
 import com.atguigu.common.vo.MemberResponseVo;
 import com.atguigu.gulimall.order.constant.OrderConstant;
+import com.atguigu.gulimall.order.constant.PayConstant;
 import com.atguigu.gulimall.order.entity.OrderItemEntity;
+import com.atguigu.gulimall.order.entity.PaymentInfoEntity;
 import com.atguigu.gulimall.order.enume.OrderStatusEnum;
 import com.atguigu.gulimall.order.feifn.CartFeignService;
 import com.atguigu.gulimall.order.feifn.MemberFeignService;
@@ -14,6 +16,7 @@ import com.atguigu.gulimall.order.feifn.ProductFeignService;
 import com.atguigu.gulimall.order.feifn.WmsFeignService;
 import com.atguigu.gulimall.order.interceptor.OrderInterceptor;
 import com.atguigu.gulimall.order.service.OrderItemService;
+import com.atguigu.gulimall.order.service.PaymentInfoService;
 import com.atguigu.gulimall.order.to.OrderCreateTo;
 import com.atguigu.gulimall.order.vo.*;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
@@ -82,6 +85,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+
+    @Autowired
+    private PaymentInfoService paymentInfoService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -264,6 +270,76 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         payVo.setSubject("谷粒商城" + orderItemEntity.getSkuName());
         payVo.setBody(orderItemEntity.getSkuAttrsVals());
         return payVo;
+    }
+
+     /*
+      * 查询当前登录用户的所有消息
+      * @return 
+      * @author djx
+      * @deprecated: Talk is cheap,show me the code
+      * @date 2022/11/29 15:33
+      */
+    @Override
+    public PageUtils listWithItem(Map<String, Object> params) {
+        MemberResponseVo responseVo = OrderInterceptor.threadLocal.get();
+
+        IPage<OrderEntity> page = this.page(
+                new Query<OrderEntity>().getPage(params),
+                new QueryWrapper<OrderEntity>().eq("member_id", responseVo.getId()).orderByDesc("id")
+        );
+        List<OrderEntity> collect = page.getRecords().stream().map(orderEntity -> {
+            List<OrderItemEntity> orderItemEntities = orderItemService.list(new QueryWrapper<OrderItemEntity>().eq("order_sn", orderEntity.getOrderSn()));
+            orderEntity.setItemEntities(orderItemEntities);
+            return orderEntity;
+        }).collect(Collectors.toList());
+
+        page.setRecords(collect);
+
+        return new PageUtils(page);
+    }
+
+     /*
+      * 处理支付宝的支付结果
+      * @author djx
+      * @deprecated: Talk is cheap,show me the code
+      * @date 2022/11/29 17:58
+      */
+    @Override
+    public String handlePayResult(PayAsyncVo asyncVo) {
+        //保存交易流水信息
+        PaymentInfoEntity paymentInfo = new PaymentInfoEntity();
+        paymentInfo.setOrderSn(asyncVo.getOut_trade_no());
+        paymentInfo.setAlipayTradeNo(asyncVo.getTrade_no());
+        paymentInfo.setTotalAmount(new BigDecimal(asyncVo.getBuyer_pay_amount()));
+        paymentInfo.setSubject(asyncVo.getBody());
+        paymentInfo.setPaymentStatus(asyncVo.getTrade_status());
+        paymentInfo.setCreateTime(new Date());
+        paymentInfo.setCallbackTime(asyncVo.getNotify_time());
+        //添加到数据库中
+        this.paymentInfoService.save(paymentInfo);
+        //修改订单状态
+        //获取当前状态
+        String tradeStatus = asyncVo.getTrade_status();
+        if (tradeStatus.equals("TRADE_SUCCESS") || tradeStatus.equals("TRADE_FINISHED")) {
+            //支付成功状态
+            String orderSn = asyncVo.getOut_trade_no(); //获取订单号
+            this.updateOrderStatus(orderSn,OrderStatusEnum.PAYED.getCode(), PayConstant.WXPAY);
+        }
+        return "success";
+    }
+
+    private void updateOrderStatus(String orderSn, Integer code,Integer payType) {
+        this.baseMapper.updateOrderStatus(orderSn,code,payType);
+    }
+
+    /**
+     * 微信异步通知结果
+     * @param notifyData
+     * @return
+     */
+    @Override
+    public String asyncNotify(String notifyData) {
+        return null;
     }
 
     /*

@@ -39,8 +39,11 @@ public class OrderInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        boolean match = new AntPathMatcher().match("/order/order/status/**", request.getRequestURI());
-        if (match) {
+        String uri = request.getRequestURI();
+        AntPathMatcher antPathMatcher = new AntPathMatcher();
+        boolean match = antPathMatcher.match("/order/order/status/**", uri);
+        boolean match1 = antPathMatcher.match("/payed/notify", uri);
+        if (match || match1) {
             return true;
         }
 

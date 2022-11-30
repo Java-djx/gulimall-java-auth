@@ -22,6 +22,22 @@ spring:
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
           #  http://localhost:88/api/member/** --> http:localhost:8000/member/**
+        # 优惠服务网关
+        - id: coupon_router
+          uri: lb://gulimall-coupon
+          predicates:
+            - Path=/api/coupon/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+          #  http://localhost:88/api/member/** --> http:localhost:8000/member/**
+        # 优惠服务网关
+        - id: order_router
+          uri: lb://gulimall-order
+          predicates:
+            - Path=/api/order/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+          #  http://localhost:88/api/member/** --> http:localhost:8000/member/**
 
         # 第三方服务网关
         - id: third-party_router
