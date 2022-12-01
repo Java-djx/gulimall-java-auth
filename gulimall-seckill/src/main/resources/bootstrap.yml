@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: gulimall-seckill
+
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: 2e1e976d-3044-4e5b-999d-cee60c6eb3d6
+      discovery:
+        server-addr: 127.0.0.1:8848

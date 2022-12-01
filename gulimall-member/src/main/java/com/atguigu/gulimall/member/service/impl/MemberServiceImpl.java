@@ -154,7 +154,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             query.put("access_token",socialUser.getAccess_token());
             query.put("uid",socialUser.getUid());
             HttpResponse response = HttpUtils.doGet("https://api.weibo.com", "/2/users/show.json", "get", new HashMap<String, String>(), query);
-
             if (response.getStatusLine().getStatusCode() == 200) {
                 //查询成功
                 String json = EntityUtils.toString(response.getEntity());

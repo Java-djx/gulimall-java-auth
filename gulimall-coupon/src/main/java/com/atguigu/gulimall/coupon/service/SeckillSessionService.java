@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.atguigu.common.utils.PageUtils;
 import com.atguigu.gulimall.coupon.entity.SeckillSessionEntity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,5 +17,15 @@ import java.util.Map;
 public interface SeckillSessionService extends IService<SeckillSessionEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+     /*
+      * 最近三天上架的秒杀活动
+      * @return
+      * @author djx
+      * @deprecated: Talk is cheap,show me the code
+      * @date 2022/11/30 10:59
+      */
+    List<SeckillSessionEntity> getlatest3Days();
+
 }
 

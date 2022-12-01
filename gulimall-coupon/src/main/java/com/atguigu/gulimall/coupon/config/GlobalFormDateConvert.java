@@ -49,7 +49,6 @@ public class GlobalFormDateConvert implements Converter<String, Date> {
     //convert转换方法 ，s是将会传递过来的日期的字符串
     @Override
     public Date convert(String source) {
-        System.out.println("convert日期格式转换器");
         if(StringUtils.isEmpty(source)){
             return null;
         }
@@ -59,6 +58,7 @@ public class GlobalFormDateConvert implements Converter<String, Date> {
         if (source.matches("^\\d{4}-\\d{1,2}$")) {
             return parseDate(source, paramList.get(0));
         } else if (source.matches("^\\d{4}-\\d{1,2}-\\d{1,2}$")) {
+            System.out.println("convert日期格式转换器");
             return parseDate(source, paramList.get(1));
         } else if (source.matches("^\\d{4}-\\d{1,2}-\\d{1,2} {1}\\d{1,2}:\\d{1,2}$")) {
             return parseDate(source, paramList.get(2));
