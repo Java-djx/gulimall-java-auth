@@ -38,9 +38,7 @@ public class MemberController {
 
     @PostMapping(value = "/oauth2/login")
     public R oauthLogin(@RequestBody SocialUser socialUser) throws Exception {
-
         MemberEntity memberEntity = memberService.login(socialUser);
-
         if (memberEntity != null) {
             return R.ok().setData(memberEntity);
         } else {

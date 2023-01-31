@@ -140,8 +140,6 @@ public class SeckillServiceImpl implements SeckillService {
                     //5、使用库存作为分布式Redisson信号量（限流）
                     // 使用库存作为分布式信号量
                     //如果当前这个场次的商品库存信息已经上架就不需要上架
-
-
                     RSemaphore semaphore = redissonClient.getSemaphore(SKU_STOCK_SEMAPHORE + token);
                     semaphore.trySetPermits(seckilldSkuVo.getSeckillCount());
                 }

@@ -67,7 +67,7 @@ spring:
           #  http:localhost:88/api/** ---> http:localhost:8080/renren-fast/api/**
 
         #nginx 谷粒网关
-        - id: gulimall_host_route
+        - id:  gulimall_host_route
           uri: lb://gulimall-product
           predicates:
             - Host=gulimall.com,item.gulimall.com

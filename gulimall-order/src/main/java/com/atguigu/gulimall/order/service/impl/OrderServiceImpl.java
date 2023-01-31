@@ -282,7 +282,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     @Override
     public PageUtils listWithItem(Map<String, Object> params) {
         MemberResponseVo responseVo = OrderInterceptor.threadLocal.get();
-
         IPage<OrderEntity> page = this.page(
                 new Query<OrderEntity>().getPage(params),
                 new QueryWrapper<OrderEntity>().eq("member_id", responseVo.getId()).orderByDesc("id")

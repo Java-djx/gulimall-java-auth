@@ -13,7 +13,7 @@ import java.util.Map;
  * @email djx@gmail.com
  * @date 2022-11-02 16:12:15
  */
-public interface OrderOperateHistoryService extends IService<OrderOperateHistoryEntity> {
+public interface  OrderOperateHistoryService extends IService<OrderOperateHistoryEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
 }

@@ -127,13 +127,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
     @Override
     public MemberEntity login(SocialUser socialUser) throws Exception {
-
         //具有登录和注册逻辑
         String uid = socialUser.getUid();
-
         //1、判断当前社交用户是否已经登录过系统
         MemberEntity memberEntity = this.baseMapper.selectOne(new QueryWrapper<MemberEntity>().eq("social_uid", uid));
-
         if (memberEntity != null) {
             //这个用户已经注册过
             //更新用户的访问令牌的时间和access_token
@@ -142,7 +139,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             update.setAccessToken(socialUser.getAccess_token());
             update.setExpiresIn(socialUser.getExpires_in());
             this.baseMapper.updateById(update);
-
             memberEntity.setAccessToken(socialUser.getAccess_token());
             memberEntity.setExpiresIn(socialUser.getExpires_in());
             return memberEntity;

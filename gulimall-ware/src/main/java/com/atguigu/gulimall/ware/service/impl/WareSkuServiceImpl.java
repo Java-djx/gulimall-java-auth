@@ -160,14 +160,12 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
     @Override
     public Boolean orderLockStock(WareSkuLockVo vo) {
         //1.锁定库存
-
         /**
          * 追溯订单消息
          */
         WareOrderTaskEntity orderTaskEntity = new WareOrderTaskEntity();
         orderTaskEntity.setOrderSn(vo.getOrderSn());
         orderTaskService.save(orderTaskEntity);
-
         //按照下单的收获地址，找到就近创库，锁定库存
         //1.找到每个商品在哪个创库有库存
         List<OrderItemVo> locks = vo.getLocks();
@@ -182,7 +180,6 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             stock.setWareId(wareId);
             return stock;
         }).collect(Collectors.toList());
-
         for (SkuWareHasStock hasStock : wareHasStocks) {
             Boolean skuStock = false;
             Long skuId = hasStock.getSkuId();
